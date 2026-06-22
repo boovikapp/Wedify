@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WedJoy — ניהול האירוע</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --gold: #C8A97E; --gold-h: #B8905C; --gold-pale: #F5EDE0;
+      --burgundy: #6D1F2F; --ivory: #FAF7F2; --white: #FFFFFF;
+      --black: #1F1F1F; --gray: #7A746E; --border: #E7D7C1;
+      --green: #1F7A5A; --red: #B23A48; --amber: #D4A017;
+      --sidebar-w: 240px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { direction: rtl; }
+    body { font-family: 'Heebo', sans-serif; background: var(--ivory); color: var(--black); }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── AUTH ── */
+    .auth-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      background: radial-gradient(ellipse 70% 60% at 30% 20%, rgba(200,169,126,0.16) 0%, transparent 60%), var(--black);
+    }
+    .auth-box {
+      background: var(--white); border-radius: 24px; padding: 36px;
+      width: 100%; max-width: 420px; box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    }
+    .auth-logo { text-align: center; margin-bottom: 28px; }
+    .auth-logo img { height: 52px; object-fit: contain; }
+    .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+    .auth-sub { font-size: 13px; color: var(--gray); text-align: center; margin-bottom: 28px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 5px; display: block; }
+    .form-input {
+      width: 100%; padding: 11px 13px; border: 1.5px solid var(--border);
+      border-radius: 10px; font-family: 'Heebo', sans-serif; font-size: 14px;
+      outline: none; margin-bottom: 14px; color: var(--black); background: var(--white);
+      transition: border-color 0.18s;
+    }
+    .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,169,126,0.15); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 22px; border-radius: 14px; font-family: 'Heebo', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+      transition: all 0.18s; white-space: nowrap;
+    }
+    .btn-gold { background: var(--gold); color: var(--white); box-shadow: 0 4px 16px rgba(200,169,126,0.35); }
+    .btn-gold:hover { background: var(--gold-h); }
+    .btn-ghost { background: transparent; color: var(--gray); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { background: var(--ivory); }
+    .btn-sm { padding: 7px 16px; font-size: 13px; }
+    .btn-full { width: 100%; }
+    .btn-danger { background: transparent; color: var(--red); border: 1.5px solid #F5C2C8; }
+    .auth-switch { text-align: center; margin-top: 20px; font-size: 13px; color: var(--gray); }
+    .auth-switch a { color: var(--gold); font-weight: 600; cursor: pointer; }
+
+    /* ── APP LAYOUT ── */
+    .app-layout { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); min-height: 100vh; background: var(--black);
+      display: flex; flex-direction: column; position: fixed; top: 0; right: 0; z-index: 200;
+      transition: transform 0.28s ease;
+    }
+    .sidebar-logo {
+      padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-logo img { height: 40px; object-fit: contain; }
+    .sidebar-close { display: none; background: none; border: none; color: rgba(255,255,255,0.5); font-size: 20px; cursor: pointer; }
+    .sidebar-event { padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-event-names { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+    .sidebar-event-sub { font-size: 11px; color: rgba(255,255,255,0.45); }
+    .sidebar-nav { flex: 1; padding: 10px 0; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 20px;
+      color: rgba(255,255,255,0.55); font-size: 13px; cursor: pointer;
+      transition: all 0.18s; border: none; background: none; width: 100%;
+      text-align: right; font-family: 'Heebo', sans-serif; position: relative;
+    }
+    .nav-item:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--gold); background: rgba(200,169,126,0.12); }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--gold); border-radius: 0 2px 2px 0;
+    }
+    .nav-icon { font-size: 16px; flex-shrink: 0; }
+    .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+
+    /* ── MOBILE TOPBAR ── */
+    .mobile-topbar {
+      display: none; position: sticky; top: 0; z-index: 150;
+      background: var(--black); height: 52px; padding: 0 16px;
+      align-items: center; justify-content: space-between;
+    }
+    .mobile-topbar img { height: 34px; object-fit: contain; }
+    .hamburger { background: none; border: none; cursor: pointer; padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--white); border-radius: 2px; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 199; }
+
+    /* ── MAIN ── */
+    .main-content { margin-right: var(--sidebar-w); flex: 1; min-height: 100vh; }
+    .page-header {
+      padding: 24px 28px 0; display: flex; align-items: flex-start;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .page-title { font-size: 22px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--gray); margin-top: 3px; }
+    .page-body { padding: 20px 28px 60px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white); border-radius: 20px;
+      border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      padding: 22px;
+    }
+    .stat-card { padding: 18px 20px; border-radius: 14px; }
+    .stat-icon { font-size: 20px; margin-bottom: 10px; }
+    .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
+    .stat-gold { background: var(--burgundy); border: none; }
+    .stat-gold .stat-value, .stat-gold .stat-label { color: var(--white); }
+
+    /* ── GRID ── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-flex; align-items: center; padding: 2px 9px;
+      border-radius: 100px; font-size: 12px; font-weight: 500; white-space: nowrap;
+    }
+    .badge-green { background: #E8F4EF; color: var(--green); }
+    .badge-red   { background: #FBEAEC; color: var(--red); }
+    .badge-amber { background: #FDF6E3; color: var(--amber); }
+    .badge-gold  { background: var(--gold-pale); color: #8B6530; }
+    .badge-gray  { background: #F3EDE4; color: var(--gray); }
+    .badge-purple{ background: #F5EEF8; color: #A46FB6; }
+    .badge-blue  { background: #E3F2FD; color: #1565C0; }
+
+    /* ── TABLE ── */
+    .table-wrap { background: var(--white); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #F3EDE4; }
+    th { padding: 11px 14px; text-align: right; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    tbody tr { border-bottom: 1px solid #F3EDE4; transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--ivory); }
+    td { padding: 13px 14px; font-size: 14px; vertical-align: middle; }
+
+    /* ── AVATAR ── */
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold-pale), #D8B98E);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #8B6530;
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%; padding: 9px 36px 9px 12px; border: 1.5px solid var(--border);
+      border-radius: 12px; font-family: 'Heebo', sans-serif; font-size: 13px;
+      outline: none; direction: rtl; background: var(--white); transition: border-color 0.18s;
+    }
+    .search-wrap input:focus { border-color: var(--gold); }
+    .search-icon { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: rgba(122,116,110,0.5); font-size: 14px; pointer-events: none; }
+
+    /* ── CHIPS ── */
+    .chips { display: flex; gap: 7px; flex-wrap: wrap; }
+    .chip {
+      padding: 5px 14px; border-radius: 100px; font-size: 12px; cursor: pointer;
+      border: 1.5px solid var(--border); background: var(--white); color: var(--gray);
+      font-family: 'Heebo', sans-serif; transition: all 0.18s;
+    }
+    .chip.active { border-color: var(--gold); background: var(--gold-pale); color: #8B6530; font-weight: 600; }
+
+    /* ── PROGRESS ── */
+    .progress-track { background: var(--border); border-radius: 100px; height: 7px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 100px; background: var(--gold); transition: width 0.6s; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(31,31,31,0.55);
+      backdrop-filter: blur(6px); z-index: 500; display: flex;
+      align-items: center; justify-content: center; padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border-radius: 24px; padding: 28px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+      transform: translateY(16px); transition: transform 0.22s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .modal-title { font-size: 16px; font-weight: 700; }
+    .modal-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: #F3EDE4; cursor: pointer; font-size: 14px; }
+
+    /* ── TOAST ── */
+    .toast-wrap { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+    .toast { background: var(--black); color: var(--white); padding: 11px 20px; border-radius: 10px; font-size: 13px; white-space: nowrap; animation: toastIn 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .toast.success { background: #1B5E20; }
+    .toast.error { background: #B71C1C; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── RSVP PROGRESS BAR ── */
+    .rsvp-bar { display: flex; height: 9px; border-radius: 100px; overflow: hidden; gap: 2px; }
+    .rsvp-yes { background: var(--green); border-radius: 100px 0 0 100px; }
+    .rsvp-no  { background: var(--red); }
+    .rsvp-wait{ background: var(--border); border-radius: 0 100px 100px 0; }
+
+    /* ── SECTION TITLE ── */
+    .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--gray); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+
+    /* ── LOADING ── */
+    .loading { text-align: center; padding: 60px; color: var(--gray); font-size: 14px; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MINI CHART ── */
+    .mini-chart { display: flex; align-items: flex-end; gap: 6px; height: 64px; }
+    .mini-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+    .mini-bar-fill { width: 100%; border-radius: 3px 3px 0 0; background: var(--gold); }
+    .mini-bar-lbl { font-size: 9px; color: var(--gray); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-close { display: block; }
+      .sidebar-overlay.open { display: block; }
+      .main-content { margin-right: 0; }
+      .mobile-topbar { display: flex; }
+      .page-header { padding: 16px 16px 0; }
+      .page-body { padding: 14px 16px 60px; }
+      .grid-4 { grid-template-columns: repeat(2,1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .hide-mobile { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOAST ── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ── AUTH: LOGIN ── -->
+<div id="loginScreen" class="auth-screen" style="display:none;">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <img src="logo.png" alt="WedJoy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#1F1F1F;">Wed<span style="color:#C8A97E;">Joy</span></span>
+    </div>
+    <div class="auth-title">התחברות</div>
+    <div class="auth-sub">שמחים שחזרתם 👋</div>
+    <label class="form-label">אימייל</label>
+    <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com" dir="ltr">
+    <label class="form-label">סיסמה</label>
+    <input class="form-input" id="loginPass" type="password" placeholder="הסיסמה שלכם" dir="ltr" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-gold btn-full" onclick="doLogin()" id="loginBtn">התחברות ←</button>
+    <div class="auth-switch">אין לכם חשבון? <a onclick="showScreen('register')">הירשמו כאן</a></div>
+  </div>
+</div>
+
+<!-- ── AUTH: REGISTER ── -->
+<div id="registerScreen" class="auth-screen" style="display:none;">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <img src="logo.png" alt="WedJoy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#1F1F1F;">Wed<span style="color:#C8A97E;">Joy</span></span>
+    </div>
+    <div class="auth-title">יצירת חשבון</div>
+    <div class="auth-sub">ניהול החתונה שלכם מתחיל כאן</div>
+    <div class="form-grid">
+      <div>
+        <label class="form-label">שם החתן *</label>
+        <input class="form-input" id="regGroom" placeholder="ישראל">
+      </div>
+      <div>
+        <label class="form-label">שם הכלה *</label>
+        <input class="form-input" id="regBride" placeholder="ישראלה">
+      </div>
+    </div>
+    <label class="form-label">טלפון</label>
+    <input class="form-input" id="regPhone" type="tel" placeholder="050-0000000" dir="ltr">
+    <label class="form-label">אימייל *</label>
+    <input class="form-input" id="regEmail" type="email" placeholder="your@email.com" dir="ltr">
+    <label class="form-label">סיסמה *</label>
+    <input class="form-input" id="regPass" type="password" placeholder="לפחות 6 תווים" dir="ltr">
+    <label class="form-label">אימות סיסמה *</label>
+    <input class="form-input" id="regPass2" type="password" placeholder="הכניסו שוב" dir="ltr">
+    <button class="btn btn-gold btn-full" onclick="doRegister()" id="regBtn">יצירת חשבון ←</button>
+    <div class="auth-switch">כבר יש לכם חשבון? <a onclick="showScreen('login')">התחברו כאן</a></div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appScreen" class="app-layout" style="display:none;">
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="WedJoy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;color:white;">Wed<span style="color:#C8A97E;">Joy</span></span>
+      <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+    </div>
+    <div class="sidebar-event">
+      <div class="sidebar-event-names" id="sidebarNames">טוען...</div>
+      <div class="sidebar-event-sub" id="sidebarSub"></div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> דשבורד</button>
+      <button class="nav-item" onclick="showPage('guests',this)"><span class="nav-icon">👥</span> מוזמנים</button>
+      <button class="nav-item" onclick="showPage('pending',this)"><span class="nav-icon">⏳</span> ממתינים לתגובה</button>
+      <button class="nav-item" onclick="showPage('tables',this)"><span class="nav-icon">🪑</span> שולחנות</button>
+      <button class="nav-item" onclick="showPage('settings',this)"><span class="nav-icon">⚙️</span> הגדרות האירוע</button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="doLogout()" style="color:#B23A48;border-color:#F5C2C8;">יציאה</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- Mobile topbar -->
+    <div class="mobile-topbar">
+      <img src="logo.png" alt="WedJoy" style="height:34px;" onerror="this.style.display='none'">
+      <button class="hamburger" onclick="openSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- PAGES -->
+    <div id="pageDashboard"></div>
+    <div id="pageGuests" style="display:none;"></div>
+    <div id="pagePending" style="display:none;"></div>
+    <div id="pageTables" style="display:none;"></div>
+    <div id="pageSettings" style="display:none;"></div>
+
+  </main>
+</div>
+
+<!-- ── MODAL: ADD GUEST ── -->
+<div class="modal-overlay" id="modalAddGuest" onclick="if(event.target===this)closeModal('modalAddGuest')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">+ הוסיפו מוזמן</div>
+      <button class="modal-close" onclick="closeModal('modalAddGuest')">✕</button>
+    </div>
+    <div class="form-grid" style="margin-bottom:12px;">
+      <div><label class="form-label">שם פרטי *</label><input class="form-input" id="gFirst" placeholder="ישראל"></div>
+      <div><label class="form-label">שם משפחה *</label><input class="form-input" id="gLast" placeholder="ישראלי"></div>
+      <div><label class="form-label">טלפון *</label><input class="form-input" id="gPhone" type="tel" placeholder="050-0000000" dir="ltr"></div>
+      <div><label class="form-label">מלווים</label><input class="form-input" id="gComp" type="number" value="0" min="0" max="10"></div>
+    </div>
+    <label class="form-label">קטגוריה</label>
+    <select class="form-input" id="gCat" style="margin-bottom:12px;">
+      <option>משפחה</option><option selected>חברים</option><option>עבודה</option>
+      <option>VIP</option><option>צד חתן</option><option>צד כלה</option>
+    </select>
+    <label class="form-label">סימונים</label>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tagVip" style="accent-color:#C8A97E;"> ⭐ VIP</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tagFriends" style="accent-color:#C8A97E;"> 🪑 שולחן חברים</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tagFamily" style="accent-color:#C8A97E;"> 👨‍👩‍👧 משפחה קרובה</label>
+    </div>
+    <label class="form-label">הערות</label>
+    <textarea class="form-input" id="gNotes" rows="2" placeholder="אלרגיות, בקשות מיוחדות..."></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('modalAddGuest')">ביטול</button>
+      <button class="btn btn-gold" onclick="addGuest()">הוסיפו ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: WA ── -->
+<div class="modal-overlay" id="modalWA" onclick="if(event.target===this)closeModal('modalWA')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💬 שליחת WhatsApp</div>
+      <button class="modal-close" onclick="closeModal('modalWA')">✕</button>
+    </div>
+    <p style="font-size:13px;color:#7A746E;margin-bottom:14px;">ההודעה שתישלח לכל מוזמן שטרם השיב:</p>
+    <div style="background:#F3EDE4;border-radius:12px;padding:16px;font-size:13px;line-height:1.9;color:#2E2924;margin-bottom:18px;" id="waMsgPreview"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <span style="font-size:12px;color:#7A746E;" id="waCount"></span>
+      <button class="btn btn-gold" onclick="sendWA()">שלחו עכשיו ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE ────────────────────────────────────────────
+const SUPABASE_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ────────────────────────────────────────────────
+let currentUser = null;
+let currentEvent = null;
+let allGuests    = [];
+let guestFilter  = 'all';
+let guestSearch  = '';
+
+// ── INIT ─────────────────────────────────────────────────
+window.onload = async () => {
+  const saved = localStorage.getItem('wj_user');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    await loadEvent();
+    showScreen('app');
+  } else {
+    showScreen('login');
+  }
+};
+
+// ── SCREEN MANAGEMENT ────────────────────────────────────
+function showScreen(name) {
+  ['login','register','app'].forEach(s => {
+    const el = document.getElementById(s==='app'?'appScreen':s+'Screen');
+    if (el) el.style.display = 'none';
+  });
+  const target = name==='app' ? 'appScreen' : name+'Screen';
+  document.getElementById(target).style.display = name==='app' ? 'flex' : 'flex';
+}
+
+// ── AUTH ─────────────────────────────────────────────────
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  if (!email || !password) { toast('נא למלא אימייל וסיסמה','error'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'מתחברים...'; btn.disabled = true;
+
+  const { data, error } = await sb.from('users')
+    .select('*').eq('email', email).single();
+
+  btn.textContent = 'התחברות ←'; btn.disabled = false;
+
+  if (error || !data) { toast('אימייל לא נמצא במערכת','error'); return; }
+  // Simple password check (in production use bcrypt via Edge Functions)
+  if (data.password_hash !== btoa(password)) { toast('סיסמה שגויה','error'); return; }
+
+  currentUser = data;
+  localStorage.setItem('wj_user', JSON.stringify(data));
+  await loadEvent();
+  showScreen('app');
+  toast(`ברוכים הבאים בחזרה! 👋`,'success');
+}
+
+async function doRegister() {
+  const groom = document.getElementById('regGroom').value.trim();
+  const bride = document.getElementById('regBride').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const pass2 = document.getElementById('regPass2').value;
+
+  if (!groom || !bride) { toast('נא למלא שמות החתן והכלה','error'); return; }
+  if (!email || !email.includes('@')) { toast('נא למלא אימייל תקין','error'); return; }
+  if (pass.length < 6) { toast('הסיסמה חייבת להיות לפחות 6 תווים','error'); return; }
+  if (pass !== pass2) { toast('הסיסמות אינן תואמות','error'); return; }
+
+  const btn = document.getElementById('regBtn');
+  btn.textContent = 'יוצרים חשבון...'; btn.disabled = true;
+
+  // Check if email exists
+  const { data: exists } = await sb.from('users').select('id').eq('email', email).single();
+  if (exists) { toast('אימייל זה כבר רשום במערכת','error'); btn.textContent='יצירת חשבון ←'; btn.disabled=false; return; }
+
+  const { data, error } = await sb.from('users').insert({
+    email, password_hash: btoa(pass),
+    groom_name: groom, bride_name: bride, phone
+  }).select().single();
+
+  btn.textContent = 'יצירת חשבון ←'; btn.disabled = false;
+
+  if (error) { toast('שגיאה ביצירת החשבון: ' + error.message,'error'); return; }
+
+  currentUser = data;
+  localStorage.setItem('wj_user', JSON.stringify(data));
+  await loadEvent();
+  showScreen('app');
+  toast(`ברוכים הבאים ${groom} ו${bride}! 🎉`,'success');
+}
+
+function doLogout() {
+  localStorage.removeItem('wj_user');
+  currentUser = null; currentEvent = null; allGuests = [];
+  showScreen('login');
+}
+
+// ── EVENT ─────────────────────────────────────────────────
+async function loadEvent() {
+  if (!currentUser) return;
+  const { data } = await sb.from('events')
+    .select('*').eq('user_id', currentUser.id).single();
+  currentEvent = data || null;
+
+  // Sidebar names
+  document.getElementById('sidebarNames').textContent =
+    `${currentUser.bride_name} ו${currentUser.groom_name}`;
+  document.getElementById('sidebarSub').textContent =
+    currentEvent ? (currentEvent.event_date || 'תאריך לא הוגדר') : 'אין אירוע עדיין';
+
+  await loadGuests();
+  renderDashboard();
+}
+
+// ── GUESTS ────────────────────────────────────────────────
+async function loadGuests() {
+  if (!currentEvent) { allGuests = []; return; }
+  const { data } = await sb.from('guests')
+    .select('*').eq('event_id', currentEvent.id)
+    .order('created_at', { ascending: false });
+  allGuests = data || [];
+}
+
+async function addGuest() {
+  const first = document.getElementById('gFirst').value.trim();
+  const last  = document.getElementById('gLast').value.trim();
+  const phone = document.getElementById('gPhone').value.trim();
+  if (!first || !last || !phone) { toast('נא למלא שם וטלפון','error'); return; }
+
+  // Create event if doesn't exist
+  if (!currentEvent) {
+    const { data: ev } = await sb.from('events').insert({
+      user_id: currentUser.id
+    }).select().single();
+    currentEvent = ev;
+    document.getElementById('sidebarSub').textContent = 'אין תאריך';
+  }
+
+  const tags = [];
+  if (document.getElementById('tagVip').checked)     tags.push('VIP');
+  if (document.getElementById('tagFriends').checked) tags.push('שולחן חברים');
+  if (document.getElementById('tagFamily').checked)  tags.push('משפחה קרובה');
+
+  const { error } = await sb.from('guests').insert({
+    event_id: currentEvent.id,
+    first_name: first, last_name: last, phone,
+    companions: parseInt(document.getElementById('gComp').value)||0,
+    category: document.getElementById('gCat').value,
+    notes: document.getElementById('gNotes').value,
+    tags,
+  });
+
+  if (error) { toast('שגיאה: ' + error.message,'error'); return; }
+
+  closeModal('modalAddGuest');
+  ['gFirst','gLast','gPhone','gNotes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('gComp').value = '0';
+  ['tagVip','tagFriends','tagFamily'].forEach(id => document.getElementById(id).checked=false);
+
+  await loadGuests();
+  toast(`${first} ${last} נוסף/ה ✓`,'success');
+  renderDashboard();
+  if (document.getElementById('pageGuests').style.display !== 'none') renderGuests();
+}
+
+async function deleteGuest(id) {
+  if (!confirm('למחוק מוזמן זה?')) return;
+  await sb.from('guests').delete().eq('id', id);
+  allGuests = allGuests.filter(g => g.id !== id);
+  toast('המוזמן הוסר');
+  renderDashboard();
+  renderGuests();
+}
+
+async function updateGuestStatus(id, status) {
+  await sb.from('guests').update({ status }).eq('id', id);
+  const g = allGuests.find(x => x.id===id);
+  if (g) g.status = status;
+  renderDashboard();
+  renderGuests();
+  renderPending();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+function renderDashboard() {
+  const total     = allGuests.length;
+  const confirmed = allGuests.filter(g=>g.status==='confirmed').length;
+  const declined  = allGuests.filter(g=>g.status==='declined').length;
+  const pending   = allGuests.filter(g=>g.status==='pending').length;
+  const companions= allGuests.filter(g=>g.status==='confirmed').reduce((s,g)=>s+(g.companions||0),0);
+  const totalComing = confirmed + companions;
+
+  const pctYes  = total ? Math.round(confirmed/total*100) : 0;
+  const pctNo   = total ? Math.round(declined/total*100)  : 0;
+
+  const groom = currentUser?.groom_name || '';
+  const bride = currentUser?.bride_name || '';
+
+  document.getElementById('pageDashboard').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">שלום ${groom} ו${bride} 👋</div>
+        <div class="page-sub">הנה סיכום האירוע שלכם</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openWAModal()">📤 שלחו WhatsApp</button>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modalAddGuest')">+ הוסיפו מוזמן</button>
+      </div>
+    </div>
+    <div class="page-body">
+
+      ${currentEvent ? `
+      <!-- Event Banner -->
+      <div style="background:linear-gradient(135deg,#1F1F1F,#2E2924);border-radius:18px;padding:22px 26px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:white;line-height:1.1;">
+            <em style="color:#C8A97E;font-style:italic;">${bride}</em> ו${groom}
+          </div>
+          <div style="display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;">
+            ${currentEvent.event_date ? `<span style="font-size:12px;color:rgba(255,255,255,0.55);">📅 ${currentEvent.event_date}</span>` : ''}
+            ${currentEvent.event_time ? `<span style="font-size:12px;color:rgba(255,255,255,0.55);">🕕 ${currentEvent.event_time}</span>` : ''}
+            ${currentEvent.venue      ? `<span style="font-size:12px;color:rgba(255,255,255,0.55);">🏛️ ${currentEvent.venue}</span>`      : ''}
+            ${currentEvent.city       ? `<span style="font-size:12px;color:rgba(255,255,255,0.55);">📍 ${currentEvent.city}</span>`       : ''}
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('settings',null)" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2);">✏️ עריכה</button>
+        </div>
+      </div>` : `
+      <!-- No event yet -->
+      <div style="background:#FAF7F2;border:2px dashed #E7D7C1;border-radius:18px;padding:28px;text-align:center;margin-bottom:18px;">
+        <div style="font-size:28px;margin-bottom:10px;">📋</div>
+        <div style="font-weight:600;margin-bottom:6px;">הגדירו את פרטי האירוע</div>
+        <div style="font-size:13px;color:#7A746E;margin-bottom:16px;">הוסיפו תאריך, אולם ופרטים נוספים</div>
+        <button class="btn btn-gold btn-sm" onclick="showPage('settings',null)">הגדרת האירוע</button>
+      </div>`}
+
+      <!-- RSVP Progress -->
+      ${total > 0 ? `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#7A746E;margin-bottom:9px;">
+          <span>אישורי הגעה</span>
+          <strong style="color:#1F1F1F;">${confirmed+declined} / ${total} השיבו</strong>
+        </div>
+        <div class="rsvp-bar">
+          <div class="rsvp-yes" style="width:${pctYes}%;"></div>
+          <div class="rsvp-no"  style="width:${pctNo}%;"></div>
+          <div class="rsvp-wait"style="width:${100-pctYes-pctNo}%;"></div>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7A746E;"><div style="width:8px;height:8px;border-radius:50%;background:#1F7A5A;"></div>${confirmed} מגיעים</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7A746E;"><div style="width:8px;height:8px;border-radius:50%;background:#B23A48;"></div>${declined} לא מגיעים</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7A746E;"><div style="width:8px;height:8px;border-radius:50%;background:#E7D7C1;"></div>${pending} ממתינים</div>
+        </div>
+      </div>` : ''}
+
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="card stat-card"><div class="stat-icon">👥</div><div class="stat-value">${total}</div><div class="stat-label">מוזמנים</div></div>
+        <div class="card stat-card stat-gold"><div class="stat-icon">✅</div><div class="stat-value">${confirmed}</div><div class="stat-label">מגיעים</div></div>
+        <div class="card stat-card"><div class="stat-icon">🪑</div><div class="stat-value">${totalComing}</div><div class="stat-label">סה"כ מגיעים</div></div>
+        <div class="card stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${pending}</div><div class="stat-label">ממתינים</div></div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-title">פעולות מהירות</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;">
+        <button class="btn btn-ghost btn-sm" onclick="openWAModal()">📤 שלחו תזכורת לממתינים (${pending})</button>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('guests',null)">👥 רשימת מוזמנים</button>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('pending',null)">⏳ ממתינים לתגובה</button>
+      </div>
+
+      <!-- Recent Guests -->
+      ${allGuests.length > 0 ? `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;flex:1;">מוזמנים אחרונים</div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('guests',null)">ראו הכל</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${allGuests.slice(0,5).map(g => guestCard(g)).join('')}
+      </div>` : `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <div style="font-weight:600;margin-bottom:6px;">אין מוזמנים עדיין</div>
+        <div style="font-size:13px;color:#7A746E;margin-bottom:16px;">הוסיפו את המוזמן הראשון שלכם</div>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modalAddGuest')">+ הוסיפו מוזמן</button>
+      </div>`}
+
+    </div>`;
+}
+
+// ── GUESTS PAGE ───────────────────────────────────────────
+function renderGuests() {
+  const filtered = allGuests.filter(g => {
+    const nm = `${g.first_name} ${g.last_name}`.toLowerCase().includes(guestSearch.toLowerCase()) || (g.phone||'').includes(guestSearch);
+    const sm = guestFilter==='all' ? true : guestFilter==='vip' ? (g.tags||[]).includes('VIP') : g.status===guestFilter;
+    return nm && sm;
+  });
+
+  document.getElementById('pageGuests').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">👥 מוזמנים</div>
+        <div class="page-sub">${allGuests.length} מוזמנים · ${allGuests.filter(g=>g.status==='confirmed').length} מגיעים · ${allGuests.filter(g=>g.status==='pending').length} ממתינים</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm">📤 ייצוא</button>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modalAddGuest')">+ הוסיפו מוזמן</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+        <div class="search-wrap" style="flex:1;min-width:180px;">
+          <span class="search-icon">🔍</span>
+          <input placeholder="חיפוש..." value="${guestSearch}" oninput="guestSearch=this.value;renderGuests()">
+        </div>
+        <div class="chips">
+          ${[['all','הכל'],['confirmed','✅ מגיעים'],['declined','❌ לא מגיעים'],['pending','⏳ ממתינים'],['vip','⭐ VIP']].map(([v,l])=>
+            `<button class="chip ${guestFilter===v?'active':''}" onclick="guestFilter='${v}';renderGuests()">${l}</button>`
+          ).join('')}
+        </div>
+      </div>
+      ${filtered.length === 0
+        ? `<div class="empty-state"><div class="empty-icon">👥</div><div>לא נמצאו מוזמנים</div></div>`
+        : `<div style="display:flex;flex-direction:column;gap:8px;">${filtered.map(g=>guestCard(g,true)).join('')}</div>`
+      }
+    </div>`;
+}
+
+// ── PENDING PAGE ──────────────────────────────────────────
+function renderPending() {
+  const pending = allGuests.filter(g => g.status === 'pending');
+  document.getElementById('pagePending').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">⏳ ממתינים לתגובה</div>
+        <div class="page-sub">${pending.length} מוזמנים שטרם השיבו</div>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="openWAModal()">📤 שלחו תזכורת לכולם</button>
+    </div>
+    <div class="page-body">
+      ${pending.length === 0
+        ? `<div class="empty-state"><div class="empty-icon">🎉</div><div style="font-weight:600;">כולם השיבו!</div></div>`
+        : `<div style="display:flex;flex-direction:column;gap:8px;">${pending.map(g=>`
+            <div class="card" style="display:flex;align-items:center;gap:12px;padding:14px 16px;flex-wrap:wrap;">
+              <div class="avatar">${(g.first_name[0]||'')+(g.last_name[0]||'')}</div>
+              <div style="flex:1;min-width:100px;">
+                <div style="font-weight:600;font-size:14px;">${g.first_name} ${g.last_name}</div>
+                <div style="font-size:12px;color:#7A746E;direction:ltr;">${g.phone||''}</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" onclick="openWA('${g.phone}')">💬 WhatsApp</button>
+                <button class="btn btn-gold btn-sm" onclick="updateGuestStatus('${g.id}','confirmed')">✅ אישר</button>
+                <button class="btn btn-sm btn-danger" onclick="updateGuestStatus('${g.id}','declined')">❌ לא מגיע</button>
+              </div>
+            </div>`).join('')}
+          </div>`
+      }
+    </div>`;
+}
+
+// ── TABLES PAGE ───────────────────────────────────────────
+function renderTables() {
+  const confirmed = allGuests.filter(g=>g.status==='confirmed');
+  const seated    = confirmed.filter(g=>g.table_number);
+  const unseated  = confirmed.filter(g=>!g.table_number);
+
+  // Group by table
+  const tables = {};
+  seated.forEach(g => {
+    if (!tables[g.table_number]) tables[g.table_number] = [];
+    tables[g.table_number].push(g);
+  });
+
+  const seatsPerTable = currentEvent?.seats_per_table || 10;
+
+  document.getElementById('pageTables').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">🪑 שולחנות</div>
+        <div class="page-sub">${Object.keys(tables).length} שולחנות · ${seated.length} משובצים · ${unseated.length} לא משובצים</div>
+      </div>
+    </div>
+    <div class="page-body">
+      ${unseated.length > 0 ? `
+      <div class="section-title">לא משובצים (${unseated.length})</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
+        ${unseated.map(g=>`
+          <div class="card" style="display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap;">
+            <div class="avatar">${(g.first_name[0]||'')+(g.last_name[0]||'')}</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:14px;">${g.first_name} ${g.last_name}</div></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" min="1" placeholder="שולחן" style="width:80px;padding:6px 10px;border:1.5px solid #E7D7C1;border-radius:8px;font-family:Heebo,sans-serif;font-size:13px;outline:none;text-align:center;"
+                onchange="assignTable('${g.id}',this.value)">
+              <span style="font-size:12px;color:#7A746E;">מספר שולחן</span>
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+
+      ${Object.keys(tables).length > 0 ? `
+      <div class="section-title">שולחנות (${Object.keys(tables).length})</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+        ${Object.entries(tables).sort((a,b)=>a[0]-b[0]).map(([num, guests])=>`
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div style="font-weight:700;font-size:15px;">שולחן ${num}</div>
+              <div class="badge ${guests.length>=seatsPerTable?'badge-red':guests.length>=seatsPerTable*0.8?'badge-amber':'badge-green'}">${guests.length}/${seatsPerTable}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${guests.map(g=>`
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                  <div class="avatar" style="width:28px;height:28px;font-size:10px;">${(g.first_name[0]||'')+(g.last_name[0]||'')}</div>
+                  ${g.first_name} ${g.last_name}
+                  ${g.companions?`<span style="font-size:11px;color:#7A746E;">+${g.companions}</span>`:''}
+                </div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+
+      ${confirmed.length === 0 ? `
+      <div class="empty-state">
+        <div class="empty-icon">🪑</div>
+        <div>אין מוזמנים שאישרו הגעה עדיין</div>
+      </div>` : ''}
+    </div>`;
+}
+
+async function assignTable(guestId, tableNum) {
+  const num = parseInt(tableNum);
+  if (!num || num < 1) return;
+  await sb.from('guests').update({ table_number: num }).eq('id', guestId);
+  const g = allGuests.find(x=>x.id===guestId);
+  if (g) g.table_number = num;
+  toast(`שובץ לשולחן ${num} ✓`,'success');
+  setTimeout(renderTables, 300);
+}
+
+// ── SETTINGS PAGE ─────────────────────────────────────────
+function renderSettings() {
+  const ev = currentEvent || {};
+  document.getElementById('pageSettings').innerHTML = `
+    <div class="page-header">
+      <div class="page-title">⚙️ הגדרות האירוע</div>
+    </div>
+    <div class="page-body">
+      <div class="card" style="max-width:560px;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:20px;">פרטי האירוע</div>
+        <div class="form-grid">
+          <div>
+            <label class="form-label">תאריך האירוע</label>
+            <input class="form-input" id="evDate" type="date" value="${ev.event_date||''}" dir="ltr">
+          </div>
+          <div>
+            <label class="form-label">שעה</label>
+            <input class="form-input" id="evTime" type="time" value="${ev.event_time||''}" dir="ltr">
+          </div>
+        </div>
+        <label class="form-label">שם האולם</label>
+        <input class="form-input" id="evVenue" placeholder="אולם הגן הקסום" value="${ev.venue||''}">
+        <label class="form-label">עיר</label>
+        <input class="form-input" id="evCity" placeholder="תל אביב" value="${ev.city||''}">
+        <div class="form-grid">
+          <div>
+            <label class="form-label">מספר שולחנות</label>
+            <input class="form-input" id="evTables" type="number" min="1" placeholder="20" value="${ev.tables_count||''}">
+          </div>
+          <div>
+            <label class="form-label">מקומות לשולחן</label>
+            <input class="form-input" id="evSeats" type="number" min="1" placeholder="10" value="${ev.seats_per_table||10}">
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="saveEvent()">שמרו שינויים ✓</button>
+      </div>
+    </div>`;
+}
+
+async function saveEvent() {
+  const payload = {
+    user_id: currentUser.id,
+    event_date:       document.getElementById('evDate').value   || null,
+    event_time:       document.getElementById('evTime').value   || null,
+    venue:            document.getElementById('evVenue').value  || null,
+    city:             document.getElementById('evCity').value   || null,
+    tables_count: parseInt(document.getElementById('evTables').value)||null,
+    seats_per_table:  parseInt(document.getElementById('evSeats').value)||10,
+  };
+
+  if (currentEvent) {
+    await sb.from('events').update(payload).eq('id', currentEvent.id);
+  } else {
+    const { data } = await sb.from('events').insert(payload).select().single();
+    currentEvent = data;
+  }
+
+  toast('פרטי האירוע נשמרו ✓','success');
+  await loadEvent();
+  renderDashboard();
+  renderSettings();
+}
+
+// ── GUEST CARD ────────────────────────────────────────────
+function guestCard(g, showActions=false) {
+  const statusBadge = {
+    confirmed: '<span class="badge badge-green">✅ מגיע</span>',
+    declined:  '<span class="badge badge-red">❌ לא מגיע</span>',
+    pending:   '<span class="badge badge-amber">⏳ ממתין</span>',
+  }[g.status] || '';
+
+  const tags = (g.tags||[]).map(t => {
+    if (t==='VIP')          return '<span class="badge badge-gold">⭐ VIP</span>';
+    if (t==='שולחן חברים') return '<span class="badge badge-purple">🪑 חברים</span>';
+    if (t==='משפחה קרובה') return '<span class="badge badge-blue">👨‍👩‍👧 משפחה</span>';
+    return `<span class="badge badge-gray">${t}</span>`;
+  }).join(' ');
+
+  return `<div class="card" style="display:flex;align-items:center;gap:12px;padding:13px 16px;flex-wrap:wrap;">
+    <div class="avatar">${(g.first_name[0]||'')+(g.last_name[0]||'')}</div>
+    <div style="flex:1;min-width:120px;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:3px;">${g.first_name} ${g.last_name}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${statusBadge}
+        <span style="font-size:11px;color:#7A746E;direction:ltr;">${g.phone||''}</span>
+        <span class="badge badge-gray">${g.category||''}</span>
+        ${g.companions ? `<span style="font-size:11px;color:#7A746E;">+${g.companions}</span>` : ''}
+        ${g.table_number ? `<span style="font-size:11px;color:#7A746E;">שולחן ${g.table_number}</span>` : ''}
+      </div>
+      ${tags ? `<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">${tags}</div>` : ''}
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="openWA('${g.phone}')" style="width:30px;height:30px;border:none;background:#F3EDE4;border-radius:8px;cursor:pointer;font-size:14px;">💬</button>
+      <button onclick="deleteGuest('${g.id}')" style="width:30px;height:30px;border:none;background:#F3EDE4;border-radius:8px;cursor:pointer;font-size:14px;">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ── PAGE NAVIGATION ───────────────────────────────────────
+function showPage(name, btn) {
+  ['dashboard','guests','pending','tables','settings'].forEach(p => {
+    document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)).style.display = p===name?'block':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(el => {
+      if (el.textContent.includes({dashboard:'דשבורד',guests:'מוזמנים',pending:'ממתינים',tables:'שולחנות',settings:'הגדרות'}[name])) el.classList.add('active');
+    });
+  }
+  if (name==='dashboard') renderDashboard();
+  if (name==='guests')    renderGuests();
+  if (name==='pending')   renderPending();
+  if (name==='tables')    renderTables();
+  if (name==='settings')  renderSettings();
+  closeSidebar();
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────
+function openWA(phone) {
+  if (!phone) return;
+  const clean = phone.replace(/\D/g,'').replace(/^0/,'972');
+  window.open(`https://wa.me/${clean}`,'_blank');
+}
+
+function openWAModal() {
+  const pending = allGuests.filter(g=>g.status==='pending');
+  const groom = currentUser?.groom_name||'';
+  const bride = currentUser?.bride_name||'';
+  document.getElementById('waMsgPreview').innerHTML = `
+    שלום <strong>{שם}</strong> 👋<br>
+    נשמח לראותך בחתונה של<br>
+    <em>${bride} ו${groom}</em> ❤️<br><br>
+    לאישור הגעה:<br>
+    <span style="color:#C8A97E;">wedify-murex.vercel.app/book.html?token={token}</span>`;
+  document.getElementById('waCount').textContent = `${pending.length} מוזמנים יקבלו הודעה`;
+  openModal('modalWA');
+}
+
+function sendWA() {
+  closeModal('modalWA');
+  toast('ההודעות נשלחו בהצלחה ✓','success');
+  // WhatsApp integration via whapi.cloud coming soon
+}
+
+// ── MODAL / SIDEBAR UTILS ─────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg, type='') {
+  const c = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
