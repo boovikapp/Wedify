@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" style="background:#0F1115;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Loviva — דמו</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1115;--bg2:#171A21;--bg3:#1E2028;--bg4:#252830;
+  --gold:#C8A97E;--gold2:#E7D7C1;--white:#F8FAFC;
+  --gray:rgba(248,250,252,0.5);--border:rgba(200,169,126,0.15);
+  --border2:rgba(248,250,252,0.08);
+  --green:#22C55E;--red:#EF4444;--amber:#F59E0B;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{direction:rtl;}
+body{font-family:'Heebo',sans-serif;background:#0F1115;color:#F8FAFC;
+  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;
+  overscroll-behavior:none;}
+
+/* TOP BAR */
+.topbar{background:#171A21;border-bottom:1px solid rgba(200,169,126,0.15);
+  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;}
+.topbar img{height:34px;object-fit:contain;}
+.demo-badge{background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);
+  color:var(--gold);font-size:11px;font-weight:700;padding:4px 12px;
+  border-radius:100px;letter-spacing:0.05em;}
+.back-btn{display:flex;align-items:center;gap:5px;color:rgba(248,250,252,0.5);
+  font-size:13px;text-decoration:none;padding:6px 12px;border-radius:10px;
+  border:1px solid rgba(248,250,252,0.08);background:transparent;cursor:pointer;
+  font-family:'Heebo',sans-serif;}
+
+/* PAGE */
+.page{padding:18px 16px 60px;max-width:480px;margin:0 auto;}
+
+/* HEADER */
+.page-title{font-size:22px;font-weight:800;color:var(--white);}
+.page-sub{font-size:13px;color:rgba(248,250,252,0.5);margin-top:2px;}
+
+/* CARD */
+.card{background:#171A21;border-radius:18px;border:1px solid rgba(200,169,126,0.15);padding:18px;margin-bottom:14px;}
+
+/* STEPS */
+.steps{display:flex;gap:0;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;}
+.step-wrap{display:flex;align-items:center;gap:0;flex-shrink:0;}
+.step-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.step-done{background:var(--green);color:#fff;}
+.step-active{background:var(--gold);color:#111;}
+.step-lbl{font-size:10px;margin-top:5px;text-align:center;white-space:nowrap;}
+.step-line{width:28px;height:2px;flex-shrink:0;margin-bottom:14px;}
+
+/* RSVP METER */
+.rsvp-meter{text-align:center;padding:22px 16px;background:linear-gradient(135deg,rgba(200,169,126,0.08),rgba(200,169,126,0.03));border:1px solid rgba(200,169,126,0.2);border-radius:18px;margin-bottom:14px;color:#F8FAFC;}
+.rsvp-pct{font-size:64px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:6px;}
+.rsvp-lbl{font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px;}
+.rsvp-sub{font-size:12px;color:rgba(248,250,252,0.5);}
+.prog{background:#252830;border-radius:100px;height:6px;margin-top:14px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#9A7A52,var(--gold),var(--gold2));}
+
+/* STATS GRID */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat{background:#171A21;border:1px solid rgba(200,169,126,0.15);border-radius:14px;padding:16px;}
+.stat-icon{font-size:18px;margin-bottom:8px;}
+.stat-val{font-size:30px;font-weight:800;line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:12px;color:rgba(248,250,252,0.5);}
+.green{color:var(--green);}
+.amber{color:var(--amber);}
+.red{color:var(--red);}
+.gold{color:var(--gold);}
+
+/* ALERTS */
+.alert{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  border-radius:12px;font-size:13px;margin-bottom:10px;}
+.alert-amber{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:var(--amber);}
+.alert-green{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:var(--green);}
+.alert-btn{margin-right:auto;padding:5px 12px;border-radius:8px;
+  font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Heebo',sans-serif;}
+
+/* SECTION TITLE */
+.sec{font-size:11px;font-weight:700;color:rgba(248,250,252,0.4);text-transform:uppercase;
+  letter-spacing:0.07em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* CONTACT ROW */
+.crow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(248,250,252,0.06);}
+.crow:last-child{border-bottom:none;}
+.av{width:34px;height:34px;border-radius:50%;background:rgba(200,169,126,0.1);
+  border:1px solid rgba(200,169,126,0.2);display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;}
+.cname{font-size:13px;font-weight:600;color:var(--white);}
+.ccat{font-size:11px;color:rgba(248,250,252,0.5);}
+.badge{display:inline-flex;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:600;}
+.bg-green{background:rgba(34,197,94,0.12);color:var(--green);}
+.bg-amber{background:rgba(245,158,11,0.12);color:var(--amber);}
+.bg-gray{background:#1E2028;color:rgba(248,250,252,0.5);}
+.bg-gold{background:rgba(200,169,126,0.12);color:var(--gold);}
+
+/* MAP */
+.map-wrap{position:relative;width:100%;height:320px;background:#1E2028;
+  border-radius:16px;border:1px solid var(--border);overflow:hidden;}
+.map-dot-bg{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(200,169,126,0.15) 1px,transparent 1px);background-size:28px 28px;}
+.tbl{position:absolute;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.1);}
+.tbl-num{font-size:13px;font-weight:800;line-height:1;}
+.tbl-cap{font-size:9px;margin-top:1px;}
+.map-label{position:absolute;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;border-radius:12px;font-size:10px;font-weight:700;}
+
+/* TASKS */
+.task{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(248,250,252,0.06);}
+.task:last-child{border-bottom:none;}
+.tchk{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;}
+.tchk-done{background:var(--green);}
+.tchk-open{border:2px solid rgba(248,250,252,0.08);}
+.ttxt{font-size:13px;color:var(--white);}
+.ttxt-done{text-decoration:line-through;color:rgba(248,250,252,0.4);}
+
+/* DEMO NOTICE */
+.demo-notice{background:rgba(200,169,126,0.08);border:1px solid rgba(200,169,126,0.2);
+  border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:16px;}
+.demo-notice p{font-size:12px;color:var(--gray);line-height:1.6;}
+.demo-notice strong{color:var(--gold);}
+
+/* BTN */
+.btn-gold{background:var(--gold);color:#111;border:none;border-radius:14px;
+  padding:14px 24px;font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;width:100%;margin-top:6px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="back-btn">← חזור</a>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRTdEN0MxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojQzhBOTdFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzlBN0E1MiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZDIiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojREZDMjhFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0I4OTA1QyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgCiAgPCEtLSBSaW5nIDEgLS0+CiAgPGNpcmNsZSBjeD0iNDQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkMikiIHN0cm9rZS13aWR0aD0iNSIvPgogIAogIDwhLS0gRGlhbW9uZCBvbiB0b3AgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSI1NCwyMiA2MCwzMCA1NCwzOCA0OCwzMCIgZmlsbD0idXJsKCNnb2xkKSIgb3BhY2l0eT0iMC45Ii8+CiAgCiAgPCEtLSBMb3ZpdmEgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9Ijc1IiAKICAgIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCAnVGltZXMgTmV3IFJvbWFuJywgc2VyaWYiIAogICAgZm9udC1zaXplPSI1MiIgCiAgICBmb250LXdlaWdodD0iNDAwIgogICAgZm9udC1zdHlsZT0iaXRhbGljIgogICAgZmlsbD0idXJsKCNnb2xkKSIKICAgIGxldHRlci1zcGFjaW5nPSItMSI+TG92aXZhPC90ZXh0PgogICAgCiAgPCEtLSBUYWdsaW5lIC0tPgogIDx0ZXh0IHg9IjEwMSIgeT0iOTUiCiAgICBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiCiAgICBmb250LXNpemU9IjExIgogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iMyIKICAgIG9wYWNpdHk9IjAuOCI+TEVTUyBTVFJFU1MuIE1PUkUgTE9WRS48L3RleHQ+Cjwvc3ZnPg==" alt="Loviva">
+  <div class="demo-badge">✦ דמו</div>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div style="margin-bottom:18px;">
+    <div class="page-title">שלום <span class="gold">מיכל</span> ויוסי 💍</div>
+    <div class="page-sub">החתונה בעוד 47 ימים · אולם הגן הקסום</div>
+  </div>
+
+  <!-- DEMO NOTICE -->
+  <div class="demo-notice">
+    <p>זהו <strong>דמו אמיתי</strong> של מערכת Loviva.<br>
+    הנתונים מדמים חתונה של 300 מוזמנים.<br>
+    <strong>הרשמו בחינם</strong> ובנו את האירוע שלכם.</p>
+    <button class="btn-gold" onclick="window.location.href='app.html'" style="margin-top:12px;padding:11px 20px;font-size:14px;">התחילו בחינם ←</button>
+  </div>
+
+  <!-- PROGRESS STEPS -->
+  <div class="card">
+    <div class="sec">התקדמות האירוע</div>
+    <div class="steps">
+      <div class="step-wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="step-dot step-done">✓</div>
+            <div class="step-lbl" style="color:var(--green);">יצירת אירוע</div>
+          </div>
+          <div class="step-line" style="background:var(--green);"></div>
+        </div> <div class="step-wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="step-dot step-done">✓</div>
+            <div class="step-lbl" style="color:var(--green);">פרטי האירוע</div>
+          </div>
+          <div class="step-line" style="background:var(--green);"></div>
+        </div> <div class="step-wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="step-dot step-done">✓</div>
+            <div class="step-lbl" style="color:var(--green);">הוספת מוזמנים</div>
+          </div>
+          <div class="step-line" style="background:var(--green);"></div>
+        </div> <div class="step-wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="step-dot step-done">✓</div>
+            <div class="step-lbl" style="color:var(--green);">שליחת הזמנות</div>
+          </div>
+          <div class="step-line" style="background:var(--green);"></div>
+        </div> <div class="step-wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="step-dot step-done">✓</div>
+            <div class="step-lbl" style="color:var(--green);">הושבה</div>
+          </div>
+          
+        </div>
+    </div>
+    <div style="margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px;">
+        <span>אישורי הגעה</span><strong style="color:var(--white);">74% מהנשלחים השיבו</strong>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:74%;"></div></div>
+    </div>
+  </div>
+
+  <!-- RSVP METER -->
+  <div class="rsvp-meter">
+    <div class="rsvp-pct">74%</div>
+    <div class="rsvp-lbl">מהמוזמנים כבר ענו</div>
+    <div class="rsvp-sub">222 מתוך 300 שקיבלו הזמנה</div>
+    <div class="prog"><div class="prog-fill" style="width:74%;"></div></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alert alert-amber">
+    <span>⏳</span>
+    <span style="flex:1;">43 מוזמנים עדיין לא ענו</span>
+    <button class="alert-btn" style="background:var(--amber);color:#111;">שלח תזכורת</button>
+  </div>
+  <div class="alert alert-green" style="margin-bottom:14px;">
+    <span>✅</span>
+    <span>הושבה חכמה הושלמה — כל המאושרים משובצים</span>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-icon">👥</div>
+      <div class="stat-val">300</div>
+      <div class="stat-lbl">ברשימת הזמנה</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val green">187</div>
+      <div class="stat-lbl">אישרו הגעה</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val amber">43</div>
+      <div class="stat-lbl">ממתינים לתגובה</div>
+    </div>
+    <div class="stat">
+      <div class="stat-icon">❌</div>
+      <div class="stat-val red">35</div>
+      <div class="stat-lbl">לא מגיעים</div>
+    </div>
+  </div>
+
+  <!-- SEATING MAP -->
+  <div class="sec">מפת אולם</div>
+  <div class="map-wrap" style="margin-bottom:14px;">
+    <div class="map-dot-bg"></div>
+    <!-- Tables -->
+    <div class="tbl" style="width:52px;height:52px;left:14px;top:14px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">1</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:74px;top:14px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">2</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">9/10</div></div> <div class="tbl" style="width:52px;height:52px;left:134px;top:14px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">3</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:194px;top:14px;background:#D4A017;border-color:rgba(212,160,23,0.4);"><div class="tbl-num" style="color:white;">4</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">8/10</div></div> <div class="tbl" style="width:52px;height:52px;left:254px;top:14px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">5</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:14px;top:80px;background:#D4A017;border-color:rgba(212,160,23,0.4);"><div class="tbl-num" style="color:white;">6</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">7/10</div></div> <div class="tbl" style="width:52px;height:52px;left:74px;top:80px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">7</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:134px;top:80px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">8</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:194px;top:80px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">9</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">9/10</div></div> <div class="tbl" style="width:52px;height:52px;left:254px;top:80px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">10</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:14px;top:146px;background:#252830;border-color:rgba(255,255,255,0.05);"><div class="tbl-num" style="color:rgba(255,255,255,0.3);">11</div><div class="tbl-cap" style="color:rgba(255,255,255,0.2);">0/10</div></div> <div class="tbl" style="width:52px;height:52px;left:74px;top:146px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">12</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:134px;top:146px;background:#D4A017;border-color:rgba(212,160,23,0.4);"><div class="tbl-num" style="color:white;">13</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">8/10</div></div> <div class="tbl" style="width:52px;height:52px;left:194px;top:146px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">14</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div> <div class="tbl" style="width:52px;height:52px;left:254px;top:146px;background:#1F7A5A;border-color:rgba(34,197,94,0.4);"><div class="tbl-num" style="color:white;">15</div><div class="tbl-cap" style="color:rgba(255,255,255,0.8);">10/10</div></div>
+    <!-- Dance floor -->
+    <div class="map-label" style="width:130px;height:40px;right:14px;bottom:60px;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+      <span style="font-size:16px;">💃</span>
+      <span style="color:rgba(167,139,250,0.9);font-size:10px;font-weight:700;">רחבת ריקודים</span>
+    </div>
+    <!-- Stage -->
+    <div class="map-label" style="width:100px;height:32px;right:14px;bottom:14px;background:rgba(200,169,126,0.1);border:1px solid rgba(200,169,126,0.2);">
+      <span style="font-size:14px;">🎤</span>
+      <span style="color:var(--gold);font-size:10px;font-weight:700;">במה</span>
+    </div>
+    <!-- Entrance -->
+    <div class="map-label" style="width:70px;height:28px;left:14px;bottom:14px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);">
+      <span style="font-size:12px;">🚪</span>
+      <span style="color:var(--green);font-size:9px;font-weight:700;">כניסה</span>
+    </div>
+  </div>
+
+  <!-- RECENT CONFIRMED -->
+  <div class="card">
+    <div class="sec">אישרו לאחרונה</div>
+    <div class="crow">
+        <div class="av">כמ</div>
+        <div style="flex:1;">
+          <div class="cname">כהן משפחה</div>
+          <div class="ccat">משפחה · צד כלה</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge bg-green">✓ מגיע</span>
+          <span class="badge bg-gold">שולחן 3</span>
+        </div>
+      </div>
+<div class="crow">
+        <div class="av">לא</div>
+        <div style="flex:1;">
+          <div class="cname">לוי אריאל</div>
+          <div class="ccat">חברים · צד חתן</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge bg-green">✓ מגיע</span>
+          <span class="badge bg-gold">שולחן 7</span>
+        </div>
+      </div>
+<div class="crow">
+        <div class="av">גד</div>
+        <div style="flex:1;">
+          <div class="cname">גולן דנה</div>
+          <div class="ccat">עבודה · משותף</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge bg-green">✓ מגיע</span>
+          <span class="badge bg-gold">שולחן 11</span>
+        </div>
+      </div>
+<div class="crow">
+        <div class="av">פמ</div>
+        <div style="flex:1;">
+          <div class="cname">פרץ משפחה</div>
+          <div class="ccat">משפחה · צד חתן</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge bg-green">✓ מגיע</span>
+          <span class="badge bg-gold">שולחן 2</span>
+        </div>
+      </div>
+<div class="crow">
+        <div class="av">שנ</div>
+        <div style="flex:1;">
+          <div class="cname">שמש נועם</div>
+          <div class="ccat">חברים · צד כלה</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="badge bg-green">✓ מגיע</span>
+          <span class="badge bg-gold">שולחן 8</span>
+        </div>
+      </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="card">
+    <div class="sec">משימות</div>
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray);margin-bottom:6px;">
+        <span>התקדמות</span><span style="color:var(--white);">4/6</span>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:66%;"></div></div>
+    </div>
+    <div class="task">
+        <div class="tchk tchk-done">✓</div>
+        <span class="ttxt ttxt-done">לסגור צלם</span>
+      </div>
+<div class="task">
+        <div class="tchk tchk-done">✓</div>
+        <span class="ttxt ttxt-done">לסגור די-ג'יי</span>
+      </div>
+<div class="task">
+        <div class="tchk tchk-done">✓</div>
+        <span class="ttxt ttxt-done">לשלוח הזמנות</span>
+      </div>
+<div class="task">
+        <div class="tchk tchk-done">✓</div>
+        <span class="ttxt ttxt-done">לאשר סידורי הושבה</span>
+      </div>
+<div class="task">
+        <div class="tchk tchk-open"></div>
+        <span class="ttxt ">לאשר תפריט עם האולם</span>
+      </div>
+<div class="task">
+        <div class="tchk tchk-open"></div>
+        <span class="ttxt ">לסגור הסעות</span>
+      </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="background:linear-gradient(135deg,rgba(200,169,126,0.1),rgba(200,169,126,0.03));border:1px solid rgba(200,169,126,0.2);border-radius:18px;padding:22px;text-align:center;margin-bottom:14px;">
+    <div style="font-size:20px;font-weight:800;color:var(--white);margin-bottom:6px;">מוכנים להתחיל? 💍</div>
+    <div style="font-size:13px;color:var(--gray);margin-bottom:16px;line-height:1.6;">פתחו את האירוע שלכם בחינם.<br>ללא כרטיס אשראי · ללא התחייבות.</div>
+    <button class="btn-gold" onclick="window.location.href='app.html'">התחילו בחינם ←</button>
+  </div>
+
+</div>
+
+<script>
+// Prevent zoom
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) e.preventDefault();
+}, {passive: false});
+let _lt = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - _lt < 300) e.preventDefault();
+  _lt = now;
+}, {passive: false});
+</script>
+</body>
+</html>
