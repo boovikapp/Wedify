@@ -1243,9 +1243,12 @@ function pgContacts() {
 
 function contactCard(c, full=false) {
   const g = guests.find(x=>x.contact_id===c.id);
+  const sendSt = c.send_status==='failed'?`<span class="badge badge-red">⚠️ נכשל</span>`:
+    c.send_status==='sent'?'':
+    '';
   const status = g?.status==='confirmed'?`<span class="badge badge-green">✓ מגיע</span>`:
     g?.status==='declined'?`<span class="badge badge-red">✗ לא מגיע</span>`:
-    c.invite_sent?`<span class="badge badge-amber">⏳ ממתין</span>`:
+    c.invite_sent?`<span class="badge badge-amber">⏳ ממתין</span>${sendSt}`:
     `<span class="badge badge-gray">טרם נשלח</span>`;
   const tags = (c.tags||[]).map(t=>
     t==='VIP'?'<span class="badge badge-gold">⭐ VIP</span>':'').join('');
@@ -1728,16 +1731,33 @@ function buildMsg(name,token){
   const evDate=ev?.event_date?new Date(ev.event_date).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'}):'';
   const evTime=ev?.event_time||'';
   const venue=ev?.venue||'';
-  
-  let msg=`שלום ${name} 💍\n\n`;
-  msg+=`${b} ו${g}\n`;
-  msg+=`שמחים להזמינכם לחתונה שלנו!\n\n`;
-  if(evDate) msg+=`📅 ${evDate}`;
-  if(evTime) msg+=` בשעה ${evTime}\n`;
-  if(venue)  msg+=`🏛️ ${venue}\n`;
-  msg+=`\nלאישור הגעה (חובה):\n`;
-  msg+=`${BOOK_URL}?token=${token}\n\n`;
+  const link=`${BOOK_URL}?token=${token}`;
+
+  let msg=`💍 *${b} ו${g}*\n\n`;
+  msg+=`היי ${name}! 😊\n\n`;
+  msg+=`נשמח מאוד לראות אתכם ביום המיוחד שלנו.\n\n`;
+  if(evDate) msg+=`📅 ${evDate}\n`;
+  if(evTime) msg+=`🕒 ${evTime}\n`;
+  if(venue)  msg+=`📍 ${venue}\n`;
+  msg+=`\n💌 לאישור הגעה לחצו כאן:\n`;
+  msg+=`${link}\n\n`;
   msg+=`מחכים לראותכם! 🎉`;
+  return msg;
+}
+
+function buildReminderMsg(name,token){
+  const g=me?.groom_name||'',b=me?.bride_name||'';
+  const evDate=ev?.event_date?new Date(ev.event_date).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'}):'';
+  const link=`${BOOK_URL}?token=${token}`;
+
+  let msg=`💍 *${b} ו${g}*\n\n`;
+  msg+=`היי ${name}! 🙏\n\n`;
+  msg+=`רצינו לוודא שקיבלת את ההזמנה שלנו.\n`;
+  msg+=`נשמח לדעת אם תוכל/י להגיע אלינו.\n\n`;
+  if(evDate) msg+=`📅 ${evDate}\n`;
+  msg+=`\n💌 לאישור הגעה לחצו כאן:\n`;
+  msg+=`${link}\n\n`;
+  msg+=`תודה רבה! 🎉`;
   return msg;
 }
 
@@ -1816,13 +1836,30 @@ async function sendInvites(){
   
   for(const c of unsent){
     toast(`שולח... ${sent+1}/${total} — ${c.first_name}`);
-    const msg=buildMsg(c.first_name,c.rsvp_token||c.id);
+    // Ensure token exists
+    if(!c.rsvp_token){
+      const tok=crypto.randomUUID();
+      await sb.from('contacts').update({rsvp_token:tok}).eq('id',c.id);
+      c.rsvp_token=tok;
+    }
+    const msg=buildMsg(c.first_name,c.rsvp_token);
     const ok=await sendViaWAPI(c.phone,msg);
+    const now=new Date().toISOString();
     if(ok){
-      await sb.from('contacts').update({invite_sent:true,invite_sent_at:new Date().toISOString()}).eq('id',c.id);
+      await sb.from('contacts').update({
+        invite_sent:true,
+        invite_sent_at:now,
+        send_status:'sent'
+      }).eq('id',c.id);
       c.invite_sent=true;
+      c.send_status='sent';
       sent++;
     } else {
+      await sb.from('contacts').update({
+        send_status:'failed',
+        invite_sent_at:now
+      }).eq('id',c.id);
+      c.send_status='failed';
       failed++;
     }
     await new Promise(r=>setTimeout(r,600)); // delay between messages
@@ -1840,7 +1877,7 @@ async function sendInvites(){
 async function sendReminder(cid,phone,name){
   const c=contacts.find(x=>x.id===cid);
   const g=me?.groom_name||'',b=me?.bride_name||'';
-  const msg=`שלום ${name} 👋\n\nרצינו לוודא שקיבלת את ההזמנה לחתונה של\n${b} ו${g} 💍\n\nנשמח לדעת אם תוכל/י להגיע 🙏\n${BOOK_URL}?token=${c?.rsvp_token||c?.id||''}`;
+  const msg=buildReminderMsg(name,c?.rsvp_token||c?.id||'');
   const ok=await sendViaWAPI(phone,msg);
   if(!ok) openWA(phone,msg); // fallback to manual WA
   toast(`תזכורת נשלחה ל${name} ✓`,'success');
