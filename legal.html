@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Loviva — מידע משפטי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{direction:rtl;background:#0F1115;}
+body{font-family:'Heebo',sans-serif;background:#0F1115;color:#F8FAFC;
+  -webkit-font-smoothing:antialiased;line-height:1.8;}
+
+/* NAV */
+nav{background:rgba(15,17,21,0.95);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(200,169,126,0.15);
+  padding:0 24px;height:56px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:50;}
+nav img{height:34px;object-fit:contain;}
+nav a{color:rgba(248,250,252,0.6);font-size:13px;text-decoration:none;
+  padding:7px 14px;border-radius:10px;border:1px solid rgba(200,169,126,0.15);
+  transition:all 0.15s;}
+nav a:hover{color:#C8A97E;border-color:#C8A97E;}
+
+/* HERO */
+.hero{padding:60px 24px 40px;text-align:center;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(200,169,126,0.08),transparent 60%);}
+.hero h1{font-size:32px;font-weight:800;color:#F8FAFC;margin-bottom:8px;}
+.hero p{font-size:14px;color:rgba(248,250,252,0.5);}
+
+/* TABS */
+.tabs{display:flex;gap:0;overflow-x:auto;padding:0 24px;margin-bottom:0;
+  border-bottom:1px solid rgba(200,169,126,0.12);background:#0F1115;
+  position:sticky;top:56px;z-index:40;}
+.tab{padding:14px 18px;font-size:13px;font-weight:600;cursor:pointer;
+  color:rgba(248,250,252,0.5);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all 0.15s;background:none;border-top:none;
+  border-left:none;border-right:none;font-family:'Heebo',sans-serif;}
+.tab.active{color:#C8A97E;border-bottom-color:#C8A97E;}
+.tab:hover{color:#F8FAFC;}
+
+/* CONTENT */
+.content{max-width:720px;margin:0 auto;padding:40px 24px 80px;}
+.section{display:none;}
+.section.active{display:block;}
+
+.section h2{font-size:24px;font-weight:800;color:#F8FAFC;margin-bottom:6px;}
+.section .updated{font-size:12px;color:rgba(248,250,252,0.35);margin-bottom:32px;}
+.section h3{font-size:16px;font-weight:700;color:#C8A97E;margin:28px 0 10px;}
+.section p{font-size:14px;color:rgba(248,250,252,0.75);margin-bottom:12px;line-height:1.85;}
+.section ul{padding-right:20px;margin-bottom:12px;}
+.section ul li{font-size:14px;color:rgba(248,250,252,0.75);margin-bottom:6px;line-height:1.75;}
+.divider{height:1px;background:rgba(200,169,126,0.1);margin:24px 0;}
+
+/* CONTACT FORM */
+.contact-card{background:#171A21;border:1px solid rgba(200,169,126,0.15);
+  border-radius:20px;padding:28px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;font-weight:600;color:rgba(248,250,252,0.5);
+  display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid rgba(248,250,252,0.08);
+  border-radius:12px;font-family:'Heebo',sans-serif;font-size:14px;
+  background:#1E2028;color:#F8FAFC;outline:none;transition:border-color 0.15s;}
+.form-input:focus{border-color:#C8A97E;}
+textarea.form-input{resize:vertical;min-height:100px;}
+.btn-send{background:#C8A97E;color:#111;border:none;border-radius:12px;
+  padding:13px 28px;font-family:'Heebo',sans-serif;font-size:14px;
+  font-weight:700;cursor:pointer;width:100%;margin-top:4px;}
+.contact-info{display:flex;flex-direction:column;gap:10px;margin-top:24px;
+  padding-top:20px;border-top:1px solid rgba(200,169,126,0.1);}
+.contact-row{display:flex;align-items:center;gap:10px;font-size:13px;
+  color:rgba(248,250,252,0.6);}
+.contact-row a{color:#C8A97E;text-decoration:none;}
+
+/* COOKIE BANNER */
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:999;
+  background:#171A21;border-top:1px solid rgba(200,169,126,0.2);
+  padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+#cookieBanner p{font-size:13px;color:rgba(248,250,252,0.7);flex:1;line-height:1.6;}
+#cookieBanner a{color:#C8A97E;}
+.btn-cookie{padding:9px 20px;border-radius:10px;font-family:'Heebo',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;}
+.btn-accept{background:#C8A97E;color:#111;}
+.btn-decline{background:transparent;color:rgba(248,250,252,0.5);
+  border:1px solid rgba(248,250,252,0.15);}
+
+/* FOOTER */
+footer{text-align:center;padding:24px;border-top:1px solid rgba(200,169,126,0.1);
+  font-size:12px;color:rgba(248,250,252,0.25);}
+footer a{color:rgba(200,169,126,0.5);text-decoration:none;margin:0 8px;}
+</style>
+</head>
+<body>
+
+<!-- COOKIE BANNER -->
+<div id="cookieBanner" style="display:none;">
+  <p>אנחנו משתמשים בעוגיות כדי לשפר את חוויית השימוש שלכם.
+    <a href="#" onclick="showTab('privacy')">מדיניות פרטיות</a></p>
+  <button class="btn-cookie btn-decline" onclick="setCookie('declined')">דחה</button>
+  <button class="btn-cookie btn-accept" onclick="setCookie('accepted')">אישור</button>
+</div>
+
+<!-- NAV -->
+<nav>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRTdEN0MxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojQzhBOTdFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzlBN0E1MiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZDIiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojREZDMjhFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0I4OTA1QyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgCiAgPCEtLSBSaW5nIDEgLS0+CiAgPGNpcmNsZSBjeD0iNDQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkMikiIHN0cm9rZS13aWR0aD0iNSIvPgogIAogIDwhLS0gRGlhbW9uZCBvbiB0b3AgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSI1NCwyMiA2MCwzMCA1NCwzOCA0OCwzMCIgZmlsbD0idXJsKCNnb2xkKSIgb3BhY2l0eT0iMC45Ii8+CiAgCiAgPCEtLSBMb3ZpdmEgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9Ijc1IiAKICAgIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCAnVGltZXMgTmV3IFJvbWFuJywgc2VyaWYiIAogICAgZm9udC1zaXplPSI1MiIgCiAgICBmb250LXdlaWdodD0iNDAwIgogICAgZm9udC1zdHlsZT0iaXRhbGljIgogICAgZmlsbD0idXJsKCNnb2xkKSIKICAgIGxldHRlci1zcGFjaW5nPSItMSI+TG92aXZhPC90ZXh0PgogICAgCiAgPCEtLSBUYWdsaW5lIC0tPgogIDx0ZXh0IHg9IjEwMSIgeT0iOTUiCiAgICBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiCiAgICBmb250LXNpemU9IjExIgogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iMyIKICAgIG9wYWNpdHk9IjAuOCI+TEVTUyBTVFJFU1MuIE1PUkUgTE9WRS48L3RleHQ+Cjwvc3ZnPg==" alt="Loviva">
+  <a href="index.html">← חזור לאתר</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>מידע משפטי</h1>
+  <p>שקיפות מלאה — כי אתם סומכים עלינו</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('terms')">תקנון שימוש</button>
+  <button class="tab" onclick="showTab('privacy')">מדיניות פרטיות</button>
+  <button class="tab" onclick="showTab('refund')">ביטולים והחזרים</button>
+  <button class="tab" onclick="showTab('contact')">יצירת קשר</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- תקנון שימוש -->
+  <div class="section active" id="sec-terms">
+    <h2>תקנון שימוש</h2>
+    <div class="updated">עודכן לאחרונה: יוני 2025</div>
+
+    <h3>1. כללי</h3>
+    <p>Loviva היא פלטפורמה לניהול מוזמנים ואישורי הגעה לאירועים, המופעלת על ידי דור מרד, עוסק פטור.</p>
+    <p>השימוש בפלטפורמה מהווה הסכמה לתנאים המפורטים במסמך זה. אם אינכם מסכימים — אנא הימנעו מהשימוש בשירות.</p>
+
+    <h3>2. הגדרת השירות</h3>
+    <p>Loviva מאפשרת לזוגות לנהל רשימות מוזמנים, לשלוח הזמנות דיגיטליות דרך WhatsApp, לקבל אישורי הגעה ולנהל הושבה לאירועים.</p>
+
+    <h3>3. תנאי שימוש</h3>
+    <ul>
+      <li>המשתמש חייב להיות בן 18 ומעלה.</li>
+      <li>אסור להשתמש בפלטפורמה לשליחת ספאם או הודעות פרסומיות שאינן קשורות לאירוע.</li>
+      <li>האחריות על תוכן ההזמנות, רשימות המוזמנים והמידע שמוזן — על המשתמש בלבד.</li>
+      <li>אסור לעשות שימוש מסחרי בפלטפורמה ללא אישור מפורש מ-Loviva.</li>
+    </ul>
+
+    <h3>4. אחריות מוגבלת</h3>
+    <p>Loviva אינה אחראית לתקלות בשירות WhatsApp, בשרתי Supabase, או בכל שירות צד שלישי אחר. Loviva לא תישא באחריות לנזקים עקיפים הנובעים מהשימוש בפלטפורמה.</p>
+
+    <h3>5. קניין רוחני</h3>
+    <p>כל הזכויות בפלטפורמה, בעיצוב ובקוד — שמורות ל-Loviva. אין להעתיק, לשכפל או להפיץ חלק כלשהו מהשירות ללא אישור בכתב.</p>
+
+    <h3>6. שינויים בתנאים</h3>
+    <p>Loviva שומרת לעצמה את הזכות לעדכן תנאים אלה בכל עת. שימוש מתמשך בפלטפורמה לאחר עדכון מהווה הסכמה לתנאים החדשים.</p>
+
+    <div class="divider"></div>
+    <p style="color:rgba(248,250,252,0.4);font-size:13px;">לשאלות: <a href="mailto:Lovivaapp@gmail.com" style="color:#C8A97E;">Lovivaapp@gmail.com</a></p>
+  </div>
+
+  <!-- מדיניות פרטיות -->
+  <div class="section" id="sec-privacy">
+    <h2>מדיניות פרטיות</h2>
+    <div class="updated">עודכן לאחרונה: יוני 2025</div>
+
+    <h3>1. איזה מידע אנו אוספים?</h3>
+    <ul>
+      <li><strong>מידע הרשמה:</strong> שם, אימייל, טלפון.</li>
+      <li><strong>פרטי אירוע:</strong> תאריך, אולם, מספר מוזמנים.</li>
+      <li><strong>רשימת מוזמנים:</strong> שמות ומספרי טלפון של המוזמנים שהמשתמש מכניס.</li>
+      <li><strong>נתוני שימוש:</strong> כניסות למערכת, פעולות בדשבורד.</li>
+    </ul>
+
+    <h3>2. כיצד אנו משתמשים במידע?</h3>
+    <ul>
+      <li>לניהול החשבון והאירוע שלכם.</li>
+      <li>לשליחת הזמנות ותזכורות דרך WhatsApp.</li>
+      <li>לשיפור השירות על בסיס נתוני שימוש אנונימיים.</li>
+    </ul>
+
+    <h3>3. שיתוף מידע עם צדדים שלישיים</h3>
+    <p>Loviva <strong>אינה מוכרת</strong> ואינה משתפת מידע אישי עם גורמים שלישיים לצרכי פרסום.</p>
+    <p>המידע מועבר לספקי שירות הכרחיים בלבד: Supabase (אחסון נתונים), whapi.cloud (שליחת WhatsApp). שניהם כפופים למדיניות פרטיות מחמירה.</p>
+
+    <h3>4. אבטחת מידע</h3>
+    <p>המידע מאוחסן בשרתי Supabase עם הצפנה מלאה. הגישה מוגבלת לבעל החשבון בלבד באמצעות סיסמה.</p>
+
+    <h3>5. זכויות המשתמש</h3>
+    <ul>
+      <li>זכות לעיין במידע האישי שלכם.</li>
+      <li>זכות לתיקון מידע שגוי.</li>
+      <li>זכות למחיקת החשבון וכל הנתונים.</li>
+    </ul>
+    <p>לממש זכויות אלה: <a href="mailto:Lovivaapp@gmail.com" style="color:#C8A97E;">Lovivaapp@gmail.com</a></p>
+
+    <h3>6. עוגיות (Cookies)</h3>
+    <p>Loviva משתמשת בעוגיות לצרכי זיהוי משתמש ושיפור חוויית שימוש. ניתן לסרב לעוגיות דרך הגדרות הדפדפן.</p>
+
+    <h3>7. שמירת מידע</h3>
+    <p>המידע נשמר כל עוד החשבון פעיל. לאחר מחיקת החשבון — המידע נמחק תוך 30 יום.</p>
+  </div>
+
+  <!-- ביטולים והחזרים -->
+  <div class="section" id="sec-refund">
+    <h2>מדיניות ביטולים והחזרים</h2>
+    <div class="updated">עודכן לאחרונה: יוני 2025</div>
+
+    <h3>מודל התשלום</h3>
+    <p>Loviva פועלת במודל תשלום חד-פעמי לאירוע — ללא מנוי חודשי. התשלום מתבצע רגע לפני שליחת ההזמנות הראשונות.</p>
+
+    <h3>זכות ביטול</h3>
+    <ul>
+      <li><strong>לפני שליחת הזמנות ראשונה:</strong> החזר כספי מלא תוך 48 שעות מהתשלום.</li>
+      <li><strong>לאחר שליחת הזמנה אחת ויותר:</strong> לא ניתן להחזר — השירות ניתן במלואו.</li>
+    </ul>
+
+    <h3>תקלות טכניות</h3>
+    <p>במקרה של תקלה טכנית מצד Loviva שמנעה שליחת הזמנות — ייבחן כל מקרה לגופו ויינתן פיצוי מתאים (החזר חלקי או מלא).</p>
+
+    <h3>כיצד לבקש ביטול?</h3>
+    <p>שלחו אימייל ל-<a href="mailto:Lovivaapp@gmail.com" style="color:#C8A97E;">Lovivaapp@gmail.com</a> עם פרטי החשבון ונענה תוך יום עסקים אחד.</p>
+
+    <div class="divider"></div>
+    <p style="color:rgba(248,250,252,0.5);font-size:13px;">בהתאם לחוק הגנת הצרכן התשמ"א-1981 ותקנות המסחר האלקטרוני.</p>
+  </div>
+
+  <!-- יצירת קשר -->
+  <div class="section" id="sec-contact">
+    <h2>יצירת קשר</h2>
+    <div class="updated">נשמח לעזור — נחזור תוך יום עסקים אחד</div>
+
+    <div class="contact-card">
+      <div class="form-group">
+        <label class="form-label">שם מלא</label>
+        <input class="form-input" id="contactName" placeholder="ישראל ישראלי">
+      </div>
+      <div class="form-group">
+        <label class="form-label">אימייל</label>
+        <input class="form-input" id="contactEmail" type="email" placeholder="you@email.com" dir="ltr">
+      </div>
+      <div class="form-group">
+        <label class="form-label">נושא</label>
+        <select class="form-input" id="contactSubject">
+          <option>שאלה כללית</option>
+          <option>בעיה טכנית</option>
+          <option>בקשת ביטול/החזר</option>
+          <option>שיתוף פעולה</option>
+          <option>אחר</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">הודעה</label>
+        <textarea class="form-input" id="contactMsg" placeholder="כתבו את הודעתכם..."></textarea>
+      </div>
+      <button class="btn-send" onclick="sendContact()">שלחו הודעה ←</button>
+
+      <div class="contact-info">
+        <div class="contact-row">📧 <a href="mailto:Lovivaapp@gmail.com">Lovivaapp@gmail.com</a></div>
+        <div class="contact-row">💬 <a href="https://wa.me/972555629208">WhatsApp ישיר</a></div>
+        <div class="contact-row">🕒 זמן תגובה: עד יום עסקים אחד</div>
+        <div class="contact-row">🏢 דור מרד, עוסק פטור · ישראל</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div style="margin-bottom:8px;">
+    <a href="#" onclick="showTab('terms')">תקנון שימוש</a>
+    <a href="#" onclick="showTab('privacy')">מדיניות פרטיות</a>
+    <a href="#" onclick="showTab('refund')">ביטולים</a>
+    <a href="#" onclick="showTab('contact')">יצירת קשר</a>
+  </div>
+  © 2025 Loviva · דור מרד, עוסק פטור · Less Stress. More Love.
+</footer>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const tabs = {'terms':0,'privacy':1,'refund':2,'contact':3};
+  document.querySelectorAll('.tab')[tabs[name]]?.classList.add('active');
+  document.getElementById('sec-'+name)?.classList.add('active');
+  window.scrollTo({top:112,behavior:'smooth'});
+}
+
+function sendContact() {
+  const name  = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const subj  = document.getElementById('contactSubject').value;
+  const msg   = document.getElementById('contactMsg').value.trim();
+  if(!name||!email||!msg){ alert('נא למלא את כל השדות'); return; }
+  const mailto = `mailto:Lovivaapp@gmail.com?subject=${encodeURIComponent('Loviva - '+subj+' - '+name)}&body=${encodeURIComponent('שם: '+name+'\nאימייל: '+email+'\n\n'+msg)}`;
+  window.location.href = mailto;
+}
+
+// Cookie banner
+(function(){
+  if(!localStorage.getItem('lv_cookies')){
+    setTimeout(()=>document.getElementById('cookieBanner').style.display='flex',1500);
+  }
+})();
+
+function setCookie(val){
+  localStorage.setItem('lv_cookies',val);
+  document.getElementById('cookieBanner').style.display='none';
+}
+</script>
+</body>
+</html>
