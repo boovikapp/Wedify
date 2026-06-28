@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>תודה על הרכישה — Loviva</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VKNB4HCVVT"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-VKNB4HCVVT');
+// Fire purchase conversion event
+gtag('event','purchase',{
+  transaction_id: new Date().getTime(),
+  value: new URLSearchParams(window.location.search).get('amount')||199,
+  currency: 'ILS',
+  items:[{item_name: new URLSearchParams(window.location.search).get('plan')||'Premium'}]
+});
+</script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html{direction:rtl;background:#0F1115;}
+body{font-family:'Heebo',sans-serif;background:#0F1115;color:#F8FAFC;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:24px;text-align:center;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(200,169,126,0.1),transparent 60%);}
+
+.wrap{width:100%;max-width:460px;}
+
+img{height:40px;object-fit:contain;margin-bottom:32px;}
+
+.check{width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(34,197,94,0.08));
+  border:2px solid rgba(34,197,94,0.4);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 24px;}
+
+h1{font-size:30px;font-weight:800;color:#F8FAFC;margin-bottom:8px;}
+h1 em{color:#C8A97E;font-style:normal;}
+.sub{font-size:15px;color:rgba(248,250,252,0.55);margin-bottom:32px;line-height:1.7;}
+
+/* PURCHASE DETAILS */
+.receipt{background:#171A21;border:1px solid rgba(200,169,126,0.15);
+  border-radius:20px;padding:22px;margin-bottom:28px;text-align:right;}
+.receipt-row{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(248,250,252,0.05);font-size:14px;}
+.receipt-row:last-child{border-bottom:none;}
+.receipt-label{color:rgba(248,250,252,0.5);}
+.receipt-val{font-weight:700;color:#F8FAFC;}
+.receipt-val.gold{color:#C8A97E;}
+.receipt-val.green{color:#22C55E;}
+
+/* NEXT STEPS */
+.steps{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;text-align:right;}
+.step{display:flex;gap:14px;align-items:center;background:#171A21;
+  border:1px solid rgba(248,250,252,0.05);border-radius:14px;padding:14px;}
+.step-num{width:32px;height:32px;border-radius:50%;background:rgba(200,169,126,0.12);
+  border:1.5px solid rgba(200,169,126,0.25);display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:800;color:#C8A97E;flex-shrink:0;}
+.step-text{font-size:14px;color:#F8FAFC;font-weight:600;}
+.step-sub{font-size:12px;color:rgba(248,250,252,0.45);margin-top:2px;}
+
+.btn-gold{display:block;width:100%;padding:15px;border-radius:14px;
+  background:#C8A97E;color:#111;border:none;font-family:'Heebo',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;
+  margin-bottom:10px;}
+.btn-ghost{display:block;width:100%;padding:13px;border-radius:14px;
+  background:transparent;color:rgba(248,250,252,0.5);
+  border:1.5px solid rgba(248,250,252,0.1);font-family:'Heebo',sans-serif;
+  font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;}
+
+.powered{margin-top:24px;font-size:12px;color:rgba(248,250,252,0.2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRTdEN0MxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojQzhBOTdFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzlBN0E1MiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZDIiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojREZDMjhFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0I4OTA1QyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgCiAgPCEtLSBSaW5nIDEgLS0+CiAgPGNpcmNsZSBjeD0iNDQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkMikiIHN0cm9rZS13aWR0aD0iNSIvPgogIAogIDwhLS0gRGlhbW9uZCBvbiB0b3AgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSI1NCwyMiA2MCwzMCA1NCwzOCA0OCwzMCIgZmlsbD0idXJsKCNnb2xkKSIgb3BhY2l0eT0iMC45Ii8+CiAgCiAgPCEtLSBMb3ZpdmEgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9Ijc1IiAKICAgIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCAnVGltZXMgTmV3IFJvbWFuJywgc2VyaWYiIAogICAgZm9udC1zaXplPSI1MiIgCiAgICBmb250LXdlaWdodD0iNDAwIgogICAgZm9udC1zdHlsZT0iaXRhbGljIgogICAgZmlsbD0idXJsKCNnb2xkKSIKICAgIGxldHRlci1zcGFjaW5nPSItMSI+TG92aXZhPC90ZXh0PgogICAgCiAgPCEtLSBUYWdsaW5lIC0tPgogIDx0ZXh0IHg9IjEwMSIgeT0iOTUiCiAgICBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiCiAgICBmb250LXNpemU9IjExIgogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iMyIKICAgIG9wYWNpdHk9IjAuOCI+TEVTUyBTVFJFU1MuIE1PUkUgTE9WRS48L3RleHQ+Cjwvc3ZnPg==" alt="Loviva">
+
+  <!-- SUCCESS ICON -->
+  <div class="check">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+
+  <h1>תודה רבה! 💍</h1>
+  <p class="sub">הרכישה הושלמה בהצלחה.<br>האירוע שלכם מוכן לקבל מוזמנים.</p>
+
+  <!-- RECEIPT -->
+  <div class="receipt">
+    <div class="receipt-row">
+      <span class="receipt-label">חבילה</span>
+      <span class="receipt-val gold" id="planName">Premium</span>
+    </div>
+    <div class="receipt-row">
+      <span class="receipt-label">סכום ששולם</span>
+      <span class="receipt-val" id="planAmount">199₪</span>
+    </div>
+    <div class="receipt-row">
+      <span class="receipt-label">סטטוס</span>
+      <span class="receipt-val green">✓ שולם</span>
+    </div>
+    <div class="receipt-row">
+      <span class="receipt-label">אישור ישלח ל</span>
+      <span class="receipt-val" id="userEmail" style="font-size:13px;direction:ltr;">—</span>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div style="font-size:11px;font-weight:700;color:rgba(248,250,252,0.35);
+    text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;text-align:right;">
+    הצעדים הבאים
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-text">הוסיפו מוזמנים</div>
+        <div class="step-sub">ייבאו מאנשי קשר או הוסיפו ידנית</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-text">שלחו הזמנות ב-WhatsApp</div>
+        <div class="step-sub">לחיצה אחת — כולם מקבלים הזמנה אישית</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-text">עקבו אחר האישורים בזמן אמת</div>
+        <div class="step-sub">הדשבורד מתעדכן אוטומטית</div>
+      </div>
+    </div>
+  </div>
+
+  <a href="app.html" class="btn-gold">עברו לדשבורד ←</a>
+  <a href="mailto:Lovivaapp@gmail.com" class="btn-ghost">שאלות? צרו קשר</a>
+
+  <div class="powered">Loviva · Less Stress. More Love.</div>
+</div>
+
+<script>
+// Read URL params (passed from payment gateway)
+const params = new URLSearchParams(window.location.search);
+const plan   = params.get('plan')  || 'Premium';
+const amount = params.get('amount')|| '199';
+const email  = params.get('email') || localStorage.getItem('lv_user_email') || '—';
+
+document.getElementById('planName').textContent   = plan;
+document.getElementById('planAmount').textContent = amount + '₪';
+document.getElementById('userEmail').textContent  = email;
+
+// Confetti effect
+window.onload = function() {
+  const colors = ['#C8A97E','#E7D7C1','#9A7A52','#ffffff'];
+  for(let i=0;i<60;i++) {
+    setTimeout(()=>{
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;top:-10px;left:${Math.random()*100}%;
+        width:8px;height:8px;border-radius:${Math.random()>0.5?'50%':'2px'};
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        animation:fall ${1.5+Math.random()*2}s linear forwards;
+        opacity:0.8;pointer-events:none;z-index:999;`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 4000);
+    }, i*60);
+  }
+};
+</script>
+<style>
+@keyframes fall{
+  to{transform:translateY(110vh) rotate(720deg);opacity:0;}
+}
+</style>
+</body>
+</html>
