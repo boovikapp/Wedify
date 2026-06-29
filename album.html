@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>אלבום האירוע — Loviva</title>
+<meta property="og:title" content="💍 האלבום השיתופי שלנו">
+<meta property="og:description" content="תשתפו איתנו תמונות מהאירוע המיוחד">
+<meta property="og:image" content="https://wedify-murex.vercel.app/og-image.svg">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{direction:rtl;background:#0F1115;}
+body{font-family:'Heebo',sans-serif;background:#0F1115;color:#F8FAFC;
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;}
+
+/* HERO */
+.hero{padding:40px 20px 32px;text-align:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(200,169,126,0.12),transparent 70%);}
+.hero img{height:36px;margin-bottom:20px;object-fit:contain;}
+.hero-icon{font-size:0;margin-bottom:16px;}
+.hero-names{font-size:28px;font-weight:800;color:#F8FAFC;margin-bottom:6px;}
+.hero-names em{color:#C8A97E;font-style:normal;}
+.hero-sub{font-size:14px;color:rgba(248,250,252,0.55);line-height:1.7;margin-bottom:0;}
+
+/* STATS BAR */
+.stats-bar{display:flex;justify-content:center;gap:28px;padding:16px 20px;
+  border-top:1px solid rgba(200,169,126,0.1);
+  border-bottom:1px solid rgba(200,169,126,0.1);
+  background:#171A21;margin-bottom:20px;}
+.stat{text-align:center;}
+.stat-num{font-size:22px;font-weight:800;color:#C8A97E;line-height:1;}
+.stat-lbl{font-size:11px;color:rgba(248,250,252,0.4);margin-top:2px;}
+
+/* UPLOAD SECTION */
+.upload-wrap{padding:0 16px 16px;max-width:500px;margin:0 auto;}
+.upload-card{background:#171A21;border:1.5px dashed rgba(200,169,126,0.3);
+  border-radius:20px;padding:24px;text-align:center;margin-bottom:16px;
+  cursor:pointer;transition:all 0.2s;}
+.upload-card:active{background:rgba(200,169,126,0.05);}
+.upload-icon{margin-bottom:12px;}
+.upload-title{font-size:15px;font-weight:700;color:#F8FAFC;margin-bottom:5px;}
+.upload-sub{font-size:13px;color:rgba(248,250,252,0.45);}
+.upload-limit{font-size:11px;color:rgba(200,169,126,0.6);margin-top:8px;}
+input[type=file]{display:none;}
+
+/* PREVIEW */
+.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;}
+.preview-item{aspect-ratio:1;border-radius:10px;overflow:hidden;position:relative;background:#1E2028;}
+.preview-item img{width:100%;height:100%;object-fit:cover;}
+.preview-item video{width:100%;height:100%;object-fit:cover;}
+.preview-remove{position:absolute;top:4px;left:4px;width:22px;height:22px;
+  border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:white;
+  font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* BLESSING */
+.blessing-wrap{margin-bottom:16px;}
+.blessing-label{font-size:13px;font-weight:600;color:rgba(248,250,252,0.6);
+  margin-bottom:8px;display:block;}
+.blessing-input{width:100%;padding:12px 14px;border:1.5px solid rgba(248,250,252,0.08);
+  border-radius:14px;background:#1E2028;color:#F8FAFC;font-family:'Heebo',sans-serif;
+  font-size:14px;resize:none;height:90px;outline:none;transition:border-color 0.15s;}
+.blessing-input:focus{border-color:#C8A97E;}
+.blessing-input::placeholder{color:rgba(248,250,252,0.25);}
+
+/* NAME */
+.name-input{width:100%;padding:12px 14px;border:1.5px solid rgba(248,250,252,0.08);
+  border-radius:14px;background:#1E2028;color:#F8FAFC;font-family:'Heebo',sans-serif;
+  font-size:14px;outline:none;margin-bottom:12px;transition:border-color 0.15s;}
+.name-input:focus{border-color:#C8A97E;}
+.name-input::placeholder{color:rgba(248,250,252,0.25);}
+
+/* SUBMIT */
+.btn-submit{width:100%;padding:15px;border-radius:14px;background:#C8A97E;
+  color:#111;border:none;font-family:'Heebo',sans-serif;font-size:15px;
+  font-weight:700;cursor:pointer;margin-bottom:24px;transition:opacity 0.2s;}
+.btn-submit:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* GALLERY */
+.gallery-title{font-size:13px;font-weight:700;color:rgba(248,250,252,0.35);
+  text-transform:uppercase;letter-spacing:0.08em;
+  padding:0 16px;margin-bottom:12px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 16px 80px;}
+.gallery-item{aspect-ratio:1;overflow:hidden;position:relative;border-radius:6px;background:#1E2028;cursor:pointer;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;}
+.gallery-item video{width:100%;height:100%;object-fit:cover;}
+.gallery-overlay{position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,0.6));
+  padding:6px 6px 4px;}
+.gallery-name{font-size:10px;color:rgba(255,255,255,0.8);font-weight:600;}
+.gallery-blessing{position:absolute;top:4px;right:4px;
+  background:rgba(200,169,126,0.9);border-radius:4px;padding:2px 6px;
+  font-size:9px;color:#111;font-weight:700;}
+
+/* SUCCESS */
+.success{display:none;text-align:center;padding:40px 20px;}
+.success-icon{font-size:0;margin-bottom:16px;}
+.success-title{font-size:22px;font-weight:800;color:#F8FAFC;margin-bottom:8px;}
+.success-sub{font-size:14px;color:rgba(248,250,252,0.5);line-height:1.7;}
+
+/* LOADING */
+.loading{display:none;text-align:center;padding:60px 20px;}
+.spinner{width:36px;height:36px;border:3px solid rgba(200,169,126,0.2);
+  border-top-color:#C8A97E;border-radius:50%;
+  animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* PROGRESS */
+.progress-wrap{display:none;margin-bottom:14px;}
+.progress-bar{height:6px;background:#1E2028;border-radius:100px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#9A7A52,#C8A97E);
+  border-radius:100px;transition:width 0.3s;width:0%;}
+.progress-label{font-size:12px;color:rgba(248,250,252,0.5);margin-top:6px;text-align:center;}
+
+/* ERROR */
+.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);
+  border-radius:10px;padding:10px 14px;font-size:13px;color:#EF4444;
+  margin-bottom:12px;display:none;}
+</style>
+</head>
+<body>
+
+<!-- LOADING STATE -->
+<div class="loading" id="loadingState" style="display:block;">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:rgba(248,250,252,0.4);">טוען את האלבום...</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+
+  <!-- HERO -->
+  <div class="hero">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdvbGQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRTdEN0MxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojQzhBOTdFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzlBN0E1MiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ29sZDIiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojREZDMjhFIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0I4OTA1QyIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgCiAgPCEtLSBSaW5nIDEgLS0+CiAgPGNpcmNsZSBjeD0iNDQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNnb2xkMikiIHN0cm9rZS13aWR0aD0iNSIvPgogIAogIDwhLS0gRGlhbW9uZCBvbiB0b3AgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSI1NCwyMiA2MCwzMCA1NCwzOCA0OCwzMCIgZmlsbD0idXJsKCNnb2xkKSIgb3BhY2l0eT0iMC45Ii8+CiAgCiAgPCEtLSBMb3ZpdmEgdGV4dCAtLT4KICA8dGV4dCB4PSIxMDAiIHk9Ijc1IiAKICAgIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLCAnVGltZXMgTmV3IFJvbWFuJywgc2VyaWYiIAogICAgZm9udC1zaXplPSI1MiIgCiAgICBmb250LXdlaWdodD0iNDAwIgogICAgZm9udC1zdHlsZT0iaXRhbGljIgogICAgZmlsbD0idXJsKCNnb2xkKSIKICAgIGxldHRlci1zcGFjaW5nPSItMSI+TG92aXZhPC90ZXh0PgogICAgCiAgPCEtLSBUYWdsaW5lIC0tPgogIDx0ZXh0IHg9IjEwMSIgeT0iOTUiCiAgICBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiCiAgICBmb250LXNpemU9IjExIgogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iMyIKICAgIG9wYWNpdHk9IjAuOCI+TEVTUyBTVFJFU1MuIE1PUkUgTE9WRS48L3RleHQ+Cjwvc3ZnPg==" alt="Loviva">
+    <div class="hero-icon">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </div>
+    <div class="hero-names" id="coupleNames">טוען...</div>
+    <div class="hero-sub" id="heroSub">תשתפו איתנו את הרגעים המיוחדים מהחתונה</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="photoCount">0</div>
+      <div class="stat-lbl">תמונות</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="contributorCount">0</div>
+      <div class="stat-lbl">משתתפים</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="blessingCount">0</div>
+      <div class="stat-lbl">ברכות</div>
+    </div>
+  </div>
+
+  <!-- UPLOAD SECTION -->
+  <div class="upload-wrap">
+    <div id="uploadSection">
+      <div class="upload-card" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div class="upload-title">העלו תמונות מהחתונה</div>
+        <div class="upload-sub">לחצו לבחירה מהגלריה</div>
+        <div class="upload-limit">עד 3 תמונות או סרטון אחד · מקסימום 20MB</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files)">
+
+      <div class="preview-grid" id="previewGrid" style="display:none;"></div>
+
+      <div class="err" id="uploadErr"></div>
+
+      <div class="blessing-wrap">
+        <label class="blessing-label">✍️ כתבו ברכה או חוויה מהאירוע (אופציונלי)</label>
+        <textarea class="blessing-input" id="blessingInput" placeholder="היה מדהים, כל הכבוד לזוג המקסים..."></textarea>
+      </div>
+
+      <input class="name-input" id="nameInput" placeholder="השם שלכם (אופציונלי)">
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-label" id="progressLabel">מעלה...</div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="submitAlbum()">שתפו עם הזוג 💍</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success" id="successSection">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="success-title">תודה! 💕</div>
+      <div class="success-sub">התמונות שלכם נוספו לאלבום.<br>הזוג יראה אותן בקרוב!</div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="gallery-title" id="galleryTitle" style="display:none;">האלבום השיתופי</div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const WAPI = 'https://gate.whapi.cloud';
+const LOVIVA_TOKEN = 'pPSpSXvU9xYjRq1BjsmpAXWAToV97RDs';
+
+let eventId = null, userId = null, eventData = null, userData = null;
+let selectedFiles = [];
+const MAX_FILES = 3;
+const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+const NOTIFY_AT = 30; // notify couple when 30 photos
+
+window.onload = async () => {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const eid   = params.get('event');
+
+  if (!token && !eid) { showError('קישור לא תקין'); return; }
+
+  // Load event via token or event id
+  let ev = null, user = null;
+  if (eid) {
+    const r = await sb.from('events').select('*').eq('id', eid).single();
+    ev = r.data;
+  } else {
+    // Find event via contact token
+    const r = await sb.from('contacts').select('event_id').eq('rsvp_token', token).single();
+    if (r.data) {
+      const r2 = await sb.from('events').select('*').eq('id', r.data.event_id).single();
+      ev = r2.data;
+    }
+  }
+
+  if (!ev) { showError('האירוע לא נמצא'); return; }
+  eventId = ev.id;
+  eventData = ev;
+
+  const r3 = await sb.from('users').select('*').eq('id', ev.user_id).single();
+  user = r3.data;
+  userData = user;
+
+  // Update UI
+  const names = (user?.bride_name||'') + ' ו' + (user?.groom_name||'');
+  document.getElementById('coupleNames').innerHTML = 
+    `<em>${user?.bride_name||''}</em> ו${user?.groom_name||''}`;
+  document.getElementById('heroSub').textContent = 
+    'תשתפו עם ' + names + ' את הרגעים המיוחדים מהחתונה 💕';
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+
+  await loadGallery();
+};
+
+function showError(msg) {
+  document.getElementById('loadingState').innerHTML = 
+    '<div style="font-size:40px;margin-bottom:12px;">💔</div>' +
+    '<div style="font-size:16px;color:#F8FAFC;margin-bottom:6px;">' + msg + '</div>' +
+    '<div style="font-size:13px;color:rgba(248,250,252,0.4);">פנו לחתן/ה לקישור חדש</div>';
+}
+
+// ── FILE HANDLING ──
+function handleFiles(files) {
+  const err = document.getElementById('uploadErr');
+  err.style.display = 'none';
+  
+  const arr = Array.from(files);
+  const videos = arr.filter(f => f.type.startsWith('video/'));
+  const images = arr.filter(f => f.type.startsWith('image/'));
+
+  if (videos.length > 1) { showErr(err, 'ניתן להעלות סרטון אחד בלבד'); return; }
+  if (videos.length > 0 && images.length > 0) { showErr(err, 'העלו תמונות בלבד או סרטון אחד'); return; }
+  if (images.length > MAX_FILES) { showErr(err, 'ניתן להעלות עד 3 תמונות'); return; }
+
+  for (const f of arr) {
+    if (f.size > MAX_SIZE) { showErr(err, f.name + ' גדול מדי (מקסימום 20MB)'); return; }
+  }
+
+  selectedFiles = arr;
+  renderPreviews();
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  if (!selectedFiles.length) { grid.style.display='none'; return; }
+  grid.style.display = 'grid';
+  grid.innerHTML = selectedFiles.map((f,i) => {
+    const url = URL.createObjectURL(f);
+    const isVideo = f.type.startsWith('video/');
+    return `<div class="preview-item">
+      ${isVideo 
+        ? `<video src="${url}" playsinline muted></video>`
+        : `<img src="${url}" alt="">`
+      }
+      <button class="preview-remove" onclick="removeFile(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i,1);
+  renderPreviews();
+}
+
+function showErr(el, msg) { el.textContent=msg; el.style.display='block'; }
+
+// ── UPLOAD ──
+async function submitAlbum() {
+  const err = document.getElementById('uploadErr');
+  err.style.display='none';
+  const blessing = document.getElementById('blessingInput').value.trim();
+  const name     = document.getElementById('nameInput').value.trim() || 'אורח/ת';
+  
+  if (!selectedFiles.length && !blessing) {
+    showErr(err, 'נא להעלות תמונות או לכתוב ברכה');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='שולח...';
+  
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  progressWrap.style.display='block';
+
+  try {
+    const uploadedUrls = [];
+    
+    for (let i=0; i<selectedFiles.length; i++) {
+      const f = selectedFiles[i];
+      const ext = f.name.split('.').pop();
+      const path = `albums/${eventId}/${Date.now()}_${i}.${ext}`;
+      
+      progressLabel.textContent = `מעלה ${i+1} מתוך ${selectedFiles.length}...`;
+      progressFill.style.width = ((i/selectedFiles.length)*80)+'%';
+
+      const { data, error } = await sb.storage.from('album-photos').upload(path, f, {
+        contentType: f.type, upsert: false
+      });
+      
+      if (error) throw error;
+      
+      const { data:urlData } = sb.storage.from('album-photos').getPublicUrl(path);
+      uploadedUrls.push(urlData.publicUrl);
+    }
+
+    progressFill.style.width='90%';
+    progressLabel.textContent='שומר...';
+
+    // Save to DB
+    const { data:entry, error:dbErr } = await sb.from('album_entries').insert({
+      event_id: eventId,
+      contributor_name: name,
+      blessing: blessing || null,
+      photo_urls: uploadedUrls,
+      created_at: new Date().toISOString()
+    }).select().single();
+
+    if (dbErr) throw dbErr;
+
+    progressFill.style.width='100%';
+
+    // Check if should notify couple
+    await checkAndNotify();
+
+    // Show success
+    document.getElementById('uploadSection').style.display='none';
+    document.getElementById('successSection').style.display='block';
+    progressWrap.style.display='none';
+
+    // Reload gallery
+    await loadGallery();
+
+  } catch(e) {
+    btn.disabled=false; btn.textContent='שתפו עם הזוג 💍';
+    progressWrap.style.display='none';
+    showErr(err, 'שגיאה בהעלאה: ' + e.message);
+  }
+}
+
+// ── NOTIFY COUPLE ──
+async function checkAndNotify() {
+  const { count } = await sb.from('album_entries')
+    .select('*', {count:'exact',head:true})
+    .eq('event_id', eventId);
+  
+  // Check total photos
+  const { data:entries } = await sb.from('album_entries').select('photo_urls').eq('event_id',eventId);
+  const totalPhotos = (entries||[]).reduce((sum,e)=>sum+(e.photo_urls?.length||0),0);
+
+  // Notify at 30 photos (only once)
+  if (totalPhotos >= NOTIFY_AT) {
+    const { data:ev } = await sb.from('events').select('album_notified').eq('id',eventId).single();
+    if (!ev?.album_notified && userData?.phone) {
+      const phone = userData.phone.replace(/\D/g,'').replace(/^0/,'972');
+      const albumUrl = window.location.origin + '/album.html?event=' + eventId;
+      const msg = `💍 ${userData.bride_name} ו${userData.groom_name}\n\n` +
+        `🎉 האלבום השיתופי שלכם צבר ${totalPhotos} תמונות!\n\n` +
+        `המוזמנים שלכם שיתפו רגעים מיוחדים מהחתונה.\n` +
+        `לצפייה באלבום:\n${albumUrl}`;
+      
+      await fetch(`${WAPI}/messages/text`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+LOVIVA_TOKEN},
+        body:JSON.stringify({to: phone+'@s.whatsapp.net', body:msg})
+      });
+
+      await sb.from('events').update({album_notified:true}).eq('id',eventId);
+    }
+  }
+}
+
+// ── GALLERY ──
+async function loadGallery() {
+  const { data:entries } = await sb.from('album_entries')
+    .select('*').eq('event_id',eventId)
+    .order('created_at',{ascending:false});
+
+  if (!entries?.length) return;
+
+  let totalPhotos=0, totalBlessing=0, contributors=new Set();
+  const grid = document.getElementById('galleryGrid');
+  grid.innerHTML='';
+
+  entries.forEach(e => {
+    totalPhotos += e.photo_urls?.length||0;
+    if (e.blessing) totalBlessing++;
+    contributors.add(e.contributor_name);
+
+    (e.photo_urls||[]).forEach(url => {
+      const isVideo = url.match(/\.(mp4|mov|webm)/i);
+      const div = document.createElement('div');
+      div.className='gallery-item';
+      div.innerHTML = isVideo
+        ? `<video src="${url}" playsinline muted loop></video>`
+        : `<img src="${url}" loading="lazy" alt="">`;
+      if (e.contributor_name || e.blessing) {
+        div.innerHTML += `<div class="gallery-overlay"><div class="gallery-name">${e.contributor_name||''}</div></div>`;
+        if (e.blessing) div.innerHTML += `<div class="gallery-blessing">💬</div>`;
+      }
+      grid.appendChild(div);
+    });
+  });
+
+  document.getElementById('photoCount').textContent = totalPhotos;
+  document.getElementById('contributorCount').textContent = contributors.size;
+  document.getElementById('blessingCount').textContent = totalBlessing;
+
+  if (totalPhotos > 0) {
+    document.getElementById('galleryTitle').style.display='block';
+  }
+}
+
+// Prevent zoom
+document.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+let _lt=0;
+document.addEventListener('touchend',function(e){var n=Date.now();if(n-_lt<300)e.preventDefault();_lt=n;},{passive:false});
+</script>
+</body>
+</html>
