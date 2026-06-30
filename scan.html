@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>סריקת כניסה — Loviva</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{direction:rtl;background:#0A0C0F;}
+body{font-family:'Heebo',sans-serif;background:#0A0C0F;color:#F8FAFC;
+  min-height:100vh;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
+
+.topbar{background:#111318;border-bottom:1px solid rgba(200,169,126,0.15);
+  padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;}
+.topbar img{height:28px;}
+.stats-pill{display:flex;gap:10px;}
+.stat-mini{text-align:center;}
+.stat-mini-num{font-size:16px;font-weight:800;line-height:1;}
+.stat-mini-lbl{font-size:9px;color:rgba(248,250,252,0.45);}
+
+/* LOGIN */
+.login-wrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-box{width:100%;max-width:380px;background:#171A21;border:1px solid rgba(200,169,126,0.15);border-radius:24px;padding:28px;}
+.form-label{font-size:12px;font-weight:600;color:rgba(248,250,252,0.5);display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid rgba(248,250,252,0.08);border-radius:12px;background:#1E2028;color:#F8FAFC;font-family:'Heebo',sans-serif;font-size:14px;outline:none;margin-bottom:14px;}
+.form-input:focus{border-color:#C8A97E;}
+.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#EF4444;margin-bottom:14px;display:none;}
+.btn-gold{background:#C8A97E;color:#111;border:none;border-radius:12px;padding:13px 20px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+
+/* SCANNER */
+.scanner-wrap{padding:16px;max-width:480px;margin:0 auto;}
+#reader{width:100%;border-radius:18px;overflow:hidden;border:2px solid rgba(200,169,126,0.25);background:#000;}
+#reader video{border-radius:16px;}
+.scan-hint{text-align:center;font-size:13px;color:rgba(248,250,252,0.5);margin-top:14px;}
+.manual-entry{margin-top:16px;background:#171A21;border:1px solid rgba(248,250,252,0.06);border-radius:14px;padding:14px;}
+.manual-label{font-size:12px;font-weight:600;color:rgba(248,250,252,0.5);margin-bottom:8px;}
+
+/* RESULT MODAL */
+.result-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:24px;}
+.result-overlay.open{display:flex;}
+.result-card{width:100%;max-width:360px;border-radius:24px;padding:32px 24px;text-align:center;
+  animation:popIn 0.25s ease;}
+@keyframes popIn{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.result-success{background:linear-gradient(135deg,#1B4332,#0F1115);border:2px solid #22C55E;}
+.result-error{background:linear-gradient(135deg,#4A1518,#0F1115);border:2px solid #EF4444;}
+.result-warning{background:linear-gradient(135deg,#4A3815,#0F1115);border:2px solid #F59E0B;}
+.result-icon{font-size:56px;margin-bottom:14px;}
+.result-name{font-size:24px;font-weight:800;color:#F8FAFC;margin-bottom:6px;}
+.result-sub{font-size:14px;color:rgba(248,250,252,0.65);margin-bottom:18px;}
+.result-table{display:inline-flex;align-items:center;gap:8px;background:rgba(200,169,126,0.15);
+  border:1px solid rgba(200,169,126,0.3);border-radius:100px;padding:8px 20px;
+  font-size:16px;font-weight:700;color:#C8A97E;margin-bottom:20px;}
+.btn-continue{background:rgba(255,255,255,0.1);color:#fff;border:none;border-radius:12px;
+  padding:13px 28px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+
+/* RECENT LIST */
+.recent-title{font-size:11px;font-weight:700;color:rgba(248,250,252,0.35);
+  text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 10px;}
+.recent-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:#171A21;border-radius:12px;margin-bottom:6px;}
+.recent-av{width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,0.12);
+  border:1px solid rgba(34,197,94,0.3);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#22C55E;flex-shrink:0;}
+.recent-name{font-size:13px;font-weight:600;color:#F8FAFC;flex:1;}
+.recent-time{font-size:11px;color:rgba(248,250,252,0.4);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" style="height:44px;object-fit:contain;margin-bottom:12px;">
+      <div style="font-size:20px;font-weight:800;color:#F8FAFC;">סריקת כניסה</div>
+      <div style="font-size:13px;color:rgba(248,250,252,0.5);margin-top:4px;">התחברו לסריקת מוזמנים</div>
+    </div>
+    <div id="loginErr" class="err"></div>
+    <label class="form-label">אימייל</label>
+    <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com" dir="ltr">
+    <label class="form-label">סיסמה</label>
+    <input class="form-input" id="loginPass" type="password" placeholder="••••••••">
+    <button class="btn-gold" id="loginBtn" onclick="doLogin()">כניסה ←</button>
+  </div>
+</div>
+
+<!-- SCANNER APP -->
+<div id="appWrap" style="display:none;">
+  <div class="topbar">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" alt="Loviva">
+    <div class="stats-pill">
+      <div class="stat-mini">
+        <div class="stat-mini-num" id="checkedInCount" style="color:#22C55E;">0</div>
+        <div class="stat-mini-lbl">נכנסו</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-num" id="totalConfirmed" style="color:#C8A97E;">0</div>
+        <div class="stat-mini-lbl">צפויים</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scanner-wrap">
+    <div id="reader"></div>
+    <div class="scan-hint">📷 כוונו את המצלמה לברקוד שהאורח מציג</div>
+
+    <div class="manual-entry">
+      <div class="manual-label">או הקלידו קוד ידנית:</div>
+      <input class="form-input" id="manualCode" placeholder="הדביקו קוד כניסה" style="margin-bottom:8px;" dir="ltr">
+      <button class="btn-gold" onclick="manualCheckin()">אישור כניסה ✓</button>
+    </div>
+
+    <div class="recent-title">נכנסו לאחרונה</div>
+    <div id="recentList"></div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card" id="resultCard">
+    <div class="result-icon" id="resultIcon">✅</div>
+    <div class="result-name" id="resultName">שם האורח</div>
+    <div class="result-sub" id="resultSub">פרטים נוספים</div>
+    <div class="result-table" id="resultTable" style="display:none;">🪑 שולחן <span id="resultTableNum"></span></div>
+    <button class="btn-continue" onclick="closeResult()">המשך לסריקה הבאה</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+const SB_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let me=null, eventData=null, html5QrCode=null;
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  const btn   = document.getElementById('loginBtn');
+  err.style.display='none';
+  if(!email||!pass){ err.textContent='נא למלא אימייל וסיסמה'; err.style.display='block'; return; }
+  btn.textContent='מתחברים...'; btn.disabled=true;
+  try {
+    const resp = await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify({email,password:pass})
+    });
+    const json = await resp.json();
+    btn.textContent='כניסה ←'; btn.disabled=false;
+    if(!resp.ok||json.error){ err.textContent=json.error_description||'אימייל או סיסמה שגויים'; err.style.display='block'; return; }
+    localStorage.setItem('scan_token', json.access_token);
+    await loadApp(json.user.id);
+  } catch(e) {
+    btn.textContent='כניסה ←'; btn.disabled=false;
+    err.textContent='שגיאת רשת'; err.style.display='block';
+  }
+}
+
+// ── LOAD APP ──
+async function loadApp(userId) {
+  const {data:profile} = await sb.from('users').select('*').eq('auth_id', userId).single();
+  if(!profile) return;
+  me = profile;
+  const {data:ev} = await sb.from('events').select('*').eq('user_id', profile.id).single();
+  eventData = ev;
+
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('appWrap').style.display='block';
+
+  await refreshStats();
+  startScanner();
+}
+
+// ── STATS ──
+async function refreshStats() {
+  if(!eventData) return;
+  const {data:guests} = await sb.from('guests').select('*').eq('event_id',eventData.id).eq('status','confirmed');
+  const {data:checkedIn} = await sb.from('contacts').select('*').eq('event_id',eventData.id).eq('checked_in',true).order('checked_in_at',{ascending:false}).limit(10);
+
+  document.getElementById('totalConfirmed').textContent = guests?.length||0;
+  document.getElementById('checkedInCount').textContent = checkedIn?.length>=10?'10+':checkedIn?.length||0;
+
+  const list = document.getElementById('recentList');
+  if(checkedIn?.length) {
+    list.innerHTML = checkedIn.map(c => {
+      const time = c.checked_in_at ? new Date(c.checked_in_at).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
+      const initials = (c.first_name?.[0]||'')+(c.last_name?.[0]||'');
+      return `<div class="recent-item">
+        <div class="recent-av">${initials}</div>
+        <div class="recent-name">${c.first_name} ${c.last_name||''}</div>
+        <div class="recent-time">${time}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── SCANNER ──
+function startScanner() {
+  html5QrCode = new Html5Qrcode("reader");
+  const config = { fps:10, qrbox:{width:240,height:240} };
+  html5QrCode.start({facingMode:"environment"}, config, onScanSuccess, onScanError)
+    .catch(err => {
+      document.getElementById('reader').innerHTML = '<div style="padding:40px 20px;text-align:center;color:rgba(248,250,252,0.5);font-size:13px;">לא ניתן לגשת למצלמה.<br>אשרו הרשאת מצלמה בדפדפן.</div>';
+    });
+}
+
+let lastScan = '';
+let lastScanTime = 0;
+function onScanSuccess(decodedText) {
+  // Prevent duplicate rapid scans of same code
+  const now = Date.now();
+  if(decodedText===lastScan && now-lastScanTime<3000) return;
+  lastScan = decodedText; lastScanTime = now;
+  processCheckin(decodedText);
+}
+function onScanError(err) { /* ignore - fires constantly while scanning */ }
+
+function manualCheckin() {
+  const code = document.getElementById('manualCode').value.trim();
+  if(!code) return;
+  processCheckin(code);
+  document.getElementById('manualCode').value='';
+}
+
+// Extract token from full URL or raw token
+function extractToken(text) {
+  try {
+    const url = new URL(text);
+    return url.searchParams.get('token') || text;
+  } catch(e) {
+    return text; // already a raw token
+  }
+}
+
+async function processCheckin(rawCode) {
+  const token = extractToken(rawCode);
+
+  const {data:contact} = await sb.from('contacts').select('*').eq('rsvp_token', token).single();
+
+  if(!contact) {
+    showResult('error', '❌', 'קוד לא תקין', 'הברקוד הזה לא שייך לאירוע');
+    return;
+  }
+
+  const {data:guest} = await sb.from('guests').select('*').eq('contact_id', contact.id).eq('status','confirmed').single();
+
+  if(!guest) {
+    showResult('warning', '⚠️', contact.first_name+' '+(contact.last_name||''), 'לא אישר/ה הגעה במערכת');
+    return;
+  }
+
+  if(contact.checked_in) {
+    const time = contact.checked_in_at ? new Date(contact.checked_in_at).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
+    showResult('warning', '🔁', contact.first_name+' '+(contact.last_name||''), 'כבר נכנס/ה בשעה '+time, guest.table_number);
+    return;
+  }
+
+  await sb.from('contacts').update({checked_in:true, checked_in_at:new Date().toISOString()}).eq('id',contact.id);
+
+  showResult('success', '✅', contact.first_name+' '+(contact.last_name||''), 'נכנס/ה בהצלחה! ברוכים הבאים', guest.table_number);
+  refreshStats();
+}
+
+function showResult(type, icon, name, sub, tableNum) {
+  const overlay = document.getElementById('resultOverlay');
+  const card = document.getElementById('resultCard');
+  card.className = 'result-card result-'+type;
+  document.getElementById('resultIcon').textContent = icon;
+  document.getElementById('resultName').textContent = name;
+  document.getElementById('resultSub').textContent = sub;
+  const tableEl = document.getElementById('resultTable');
+  if(tableNum) {
+    tableEl.style.display='inline-flex';
+    document.getElementById('resultTableNum').textContent = tableNum;
+  } else {
+    tableEl.style.display='none';
+  }
+  overlay.classList.add('open');
+
+  // Auto close success after 2.5s for fast flow
+  if(type==='success') {
+    setTimeout(closeResult, 2500);
+  }
+
+  // Vibrate feedback
+  if(navigator.vibrate) {
+    navigator.vibrate(type==='success'?100:[100,50,100]);
+  }
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('open');
+}
+
+// ── AUTO LOGIN ──
+window.onload = async () => {
+  const saved = localStorage.getItem('scan_token');
+  if(saved) {
+    try {
+      const resp = await fetch(SB_URL+'/auth/v1/user',{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+saved}
+      });
+      if(resp.ok) {
+        const user = await resp.json();
+        await loadApp(user.id);
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('scan_token');
+  }
+};
+</script>
+</body>
+</html>

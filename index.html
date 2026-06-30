@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Loviva — פחות לחץ. יותר אהבה.</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0F1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Loviva">
+  <meta name="mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0F1115;
+  --bg2:     #171A21;
+  --bg3:     #1E2028;
+  --gold:    #C8A97E;
+  --gold2:   #E7D7C1;
+  --gold3:   #9A7A52;
+  --white:   #F8FAFC;
+  --gray:    #9CA3AF;
+  --border:  rgba(200,169,126,0.15);
+  --green:   #22C55E;
+  --red:     #EF4444;
+  --amber:   #F59E0B;
+  --radius:  16px;
+  --radius-lg: 24px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{direction:rtl;scroll-behavior:smooth;}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--white);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(15,17,21,0.92);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;
+  padding-top:env(safe-area-inset-top,0px);
+  height:calc(56px + env(safe-area-inset-top,0px));
+  display:flex;align-items:center;justify-content:space-between;}
+.nav-logo img{height:32px;}
+.nav-logo{display:flex;align-items:center;}
+.nav-logo img{height:36px;object-fit:contain;}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.btn-nav-ghost{padding:8px 18px;border-radius:12px;border:1px solid var(--border);
+  background:transparent;color:var(--gold2);font-size:14px;font-weight:600;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+.btn-nav-ghost:hover{background:rgba(200,169,126,0.1);border-color:var(--gold);}
+.btn-nav-gold{padding:8px 20px;border-radius:12px;border:none;
+  background:var(--gold);color:#111;font-size:14px;font-weight:700;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+.btn-nav-gold:hover{background:var(--gold2);transform:translateY(-1px);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;padding:calc(80px + env(safe-area-inset-top,0px)) 24px 80px;
+  position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0.18;}
+.hero-bg-grad{position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(200,169,126,0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,169,126,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 90%, rgba(200,169,126,0.05) 0%, transparent 60%);}
+.hero-bg::after{content:'';position:absolute;inset:0;opacity:0.4;
+  background-image:radial-gradient(circle,rgba(200,169,126,0.15) 1px,transparent 1px);
+  background-size:32px 32px;mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,black,transparent);}
+.hero-content{position:relative;z-index:1;max-width:680px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 18px;
+  border:1px solid rgba(200,169,126,0.4);border-radius:100px;
+  font-size:12px;color:var(--gold);letter-spacing:0.08em;margin-bottom:32px;
+  background:rgba(200,169,126,0.08);}
+.hero-h1{font-size:clamp(2.8rem,8vw,5.5rem);font-weight:800;line-height:1.05;margin-bottom:20px;color:var(--white) !important;-webkit-text-fill-color:var(--white) !important;}
+.hero-h1 em{font-style:normal;
+  background:linear-gradient(135deg,var(--gold2),var(--gold),var(--gold3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:clamp(1rem,2.5vw,1.2rem);color:var(--gray);
+  margin-bottom:48px;line-height:1.75;max-width:500px;margin-left:auto;margin-right:auto;}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.btn-primary{padding:16px 36px;border-radius:16px;border:none;
+  background:var(--gold);color:#0F1115;font-size:16px;font-weight:700;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.22s;
+  box-shadow:0 8px 32px rgba(200,169,126,0.35);}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(200,169,126,0.45);}
+.btn-secondary{padding:16px 36px;border-radius:16px;
+  border:1.5px solid rgba(200,169,126,0.35);background:transparent;
+  color:var(--white);font-size:16px;font-weight:600;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.22s;}
+.btn-secondary:hover{background:rgba(200,169,126,0.08);border-color:var(--gold);}
+.hero-note{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;}
+.hero-demo-link{font-size:13px;color:rgba(200,169,126,0.65);text-decoration:underline;text-underline-offset:3px;}
+.hero-demo-link:hover{color:var(--gold2);}
+
+/* ── STATS STRIP ── */
+.stats-strip{background:var(--bg2) !important;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);padding:32px 24px;}
+.stats-inner{max-width:900px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(4,1fr);gap:0;}
+.stat-item{text-align:center;padding:0 20px;}
+.stat-item:not(:last-child){border-left:1px solid var(--border);}
+.stat-num{font-size:2.2rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;margin-bottom:6px;}
+.stat-lbl{font-size:13px;color:rgba(255,255,255,0.55);}
+
+/* ── SECTION ── */
+section{padding:96px 24px;background:var(--bg);}
+.section-inner{max-width:1040px;margin:0 auto;}
+.section-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold) !important;-webkit-text-fill-color:var(--gold) !important;margin-bottom:16px;}
+.section-h2{font-size:clamp(1.8rem,5vw,3rem);font-weight:800;line-height:1.1;margin-bottom:16px;color:var(--white) !important;-webkit-text-fill-color:var(--white) !important;}
+.section-h2 em{font-style:normal;color:var(--gold);}
+.section-sub{font-size:16px;color:rgba(255,255,255,0.6) !important;line-height:1.75;max-width:520px;-webkit-text-fill-color:rgba(255,255,255,0.6) !important;}
+
+/* ── HOW IT WORKS ── */
+.how-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:56px;}
+.step-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:28px 24px;position:relative;transition:all 0.22s;}
+.step-card:hover{border-color:rgba(200,169,126,0.4);transform:translateY(-4px);
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);}
+.step-num{font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--gold);
+  margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.step-num::after{content:'';flex:1;height:1px;background:var(--border);}
+.step-icon{width:48px;height:48px;border-radius:14px;background:rgba(200,169,126,0.1);
+  border:1px solid rgba(200,169,126,0.2);display:flex;align-items:center;
+  justify-content:center;margin-bottom:16px;}
+.step-title{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--white);}
+.step-desc{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:56px;}
+.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:28px 24px;transition:all 0.22s;}
+.feat-card:hover{border-color:rgba(200,169,126,0.35);transform:translateY(-3px);}
+.feat-icon{width:52px;height:52px;border-radius:16px;background:rgba(200,169,126,0.1);
+  display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--gold);}
+.feat-title{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--white);}
+.feat-desc{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.75;}
+
+/* ── PREVIEW MODE ── */
+.preview-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:32px;max-width:560px;margin:40px auto 0;}
+.preview-check{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:15px;color:var(--white);}
+.preview-check:last-child{border-bottom:none;}
+.check-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;}
+.check-on{background:rgba(34,197,94,0.15);color:var(--green);}
+.check-lock{background:rgba(200,169,126,0.1);color:var(--gold);}
+.preview-cta{margin-top:24px;padding:18px;background:rgba(200,169,126,0.08);
+  border:1px solid rgba(200,169,126,0.2);border-radius:14px;text-align:center;}
+.preview-cta-title{font-size:16px;font-weight:700;margin-bottom:4px;color:var(--white);}
+.preview-cta-sub{font-size:13px;color:var(--gray);}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:56px;align-items:start;}
+.plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:32px 28px;position:relative;transition:all 0.22s;}
+.plan-card:hover{transform:translateY(-4px);}
+.plan-card.featured{border-color:var(--gold);box-shadow:0 0 0 1px rgba(200,169,126,0.3),0 20px 60px rgba(0,0,0,0.4);}
+.plan-badge{position:absolute;top:-12px;right:50%;transform:translateX(50%);
+  background:var(--gold);color:#111;padding:4px 16px;border-radius:100px;
+  font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:0.05em;}
+.plan-name{font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
+.plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:4px;}
+.plan-price-num{font-size:52px;font-weight:800;line-height:1;color:var(--white);}
+.plan-price-sym{font-size:22px;color:var(--gray);}
+.plan-sub{font-size:13px;color:var(--gold);font-weight:600;margin-bottom:6px;}
+.plan-cap{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.plan-features{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.plan-feat{display:flex;align-items:center;gap:10px;font-size:14px;}
+.plan-feat-icon{color:var(--gold);font-weight:700;flex-shrink:0;}
+.btn-plan-gold{width:100%;padding:14px;border-radius:14px;border:none;
+  background:var(--gold);color:#111;font-size:15px;font-weight:700;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+.btn-plan-gold:hover{background:var(--gold2);}
+.btn-plan-outline{width:100%;padding:14px;border-radius:14px;
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--white);font-size:15px;font-weight:600;
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+.btn-plan-outline:hover{border-color:var(--gold);background:rgba(200,169,126,0.08);}
+
+/* ── OBJECTIONS ── */
+.obj-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-top:32px;}
+.obj-item{display:flex;align-items:center;gap:8px;font-size:14px;color:rgba(255,255,255,0.6);}
+.obj-check{color:var(--green);font-weight:700;}
+
+/* ── FAQ ── */
+.faq-list{max-width:680px;margin:48px auto 0;display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.faq-q{width:100%;padding:18px 22px;background:none;border:none;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'Heebo',sans-serif;font-size:15px;font-weight:600;color:var(--white);
+  direction:rtl;text-align:right;}
+.faq-q span{color:var(--gold);font-size:20px;transition:transform 0.2s;}
+.faq-q.open span{transform:rotate(45deg);}
+.faq-a{padding:0 22px 16px;font-size:14px;color:var(--gray);line-height:1.8;display:none;}
+.faq-a.open{display:block;}
+
+/* ── FINAL CTA ── */
+.cta-section{position:relative;overflow:hidden;text-align:center;}
+.cta-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 50% 50%, rgba(200,169,126,0.15) 0%, transparent 70%);}
+.cta-content{position:relative;z-index:1;max-width:600px;margin:0 auto;}
+.cta-h2{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;margin-bottom:16px;color:var(--white) !important;-webkit-text-fill-color:var(--white) !important;}
+.cta-sub{font-size:16px;color:var(--gray);margin-bottom:40px;line-height:1.75;}
+
+/* ── TRUST BAR ── */
+.trust-bar{background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;}
+.trust-inner{max-width:860px;margin:0 auto;display:flex;justify-content:center;
+  gap:32px;flex-wrap:wrap;align-items:center;}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:13px;color:rgba(255,255,255,0.55);}
+.trust-icon{color:var(--gold);}
+
+/* ── FOOTER ── */
+footer{background:#080A0E;border-top:1px solid var(--border);
+  padding:32px 24px;text-align:center;}
+footer img{height:36px;object-fit:contain;margin-bottom:12px;opacity:0.7;}
+footer p{font-size:12px;color:rgba(255,255,255,0.25);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .stats-inner{grid-template-columns:repeat(2,1fr);gap:16px;}
+  .stat-item{border:none!important;padding:12px 0;}
+  .hero-cta{flex-direction:column;align-items:center;}
+  .btn-primary,.btn-secondary{width:100%;max-width:320px;}
+  #whatsappFloat{bottom:84px;}
+}
+@media(max-width:480px){
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── STICKY MOBILE CTA ── */
+.sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:998;
+  background:rgba(15,17,21,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+  transform:translateY(100%);transition:transform 0.25s ease;display:none;}
+.sticky-cta.visible{transform:translateY(0);}
+.sticky-cta .btn-primary{width:100%;padding:14px;font-size:15px;box-shadow:none;}
+@media(max-width:768px){.sticky-cta{display:block;}}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* ── SAFE AREA ── */
+body{padding-bottom:env(safe-area-inset-bottom);}
+</style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VKNB4HCVVT"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-VKNB4HCVVT');
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" alt="Loviva">
+  </div>
+  <div class="nav-actions">
+    <button class="btn-nav-ghost" onclick="window.location.href='app.html'">התחברות</button>
+    <button class="btn-nav-gold" onclick="window.location.href='app.html'">התחילו חינם</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <img src="data:image/jpeg;base64,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" alt="">
+    <div class="hero-bg-grad"></div>
+  </div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">✦ פחות לחץ. יותר אהבה.</div>
+    <h1 class="hero-h1">
+      כמה שעות כבר בזבזתם על<br>
+      <em>"תאשרו הגעה בבקשה"?</em>
+    </h1>
+    <p class="hero-sub">
+      שלחו 300 הזמנות אישיות ב-WhatsApp בלחיצה אחת.<br>
+      קבלו אישורים אוטומטית.<br>
+      בלי טלפונים. בלי אקסלים. בלי עצבים.
+    </p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="window.location.href='app.html'">התחילו בחינם ←</button>
+    </div>
+    <p class="hero-note">פתוח לגמרי בחינם · ללא כרטיס אשראי · משלמים רק כשמשלחים</p>
+    <a href="demo.html" class="hero-demo-link">או צפו בדמו של 60 שניות</a>
+    <div style="margin-top:18px;display:inline-flex;align-items:center;gap:7px;
+      background:rgba(200,169,126,0.07);border:1px solid rgba(200,169,126,0.18);
+      border-radius:100px;padding:6px 16px;font-size:12px;color:rgba(231,215,193,0.85);">
+      <span style="width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block;animation:pulseDot 2s infinite;"></span>
+      זוגות מצטרפים החודש ומכינים את החתונה שלהם בלי לחץ
+    </div>
+    <div class="trust-inner" style="margin-top:28px;gap:18px;">
+      <div class="trust-item"><span class="trust-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> WhatsApp רשמי</div>
+      <div class="trust-item"><span class="trust-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> פיתוח ישראלי</div>
+      <div class="trust-item"><span class="trust-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> מאובטח לחלוטין</div>
+      <div class="trust-item"><span class="trust-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> הקמה תוך 2 דקות</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-num">287</div><div class="stat-lbl">מוזמנים בלי לחשוש מאף מספר</div></div>
+    <div class="stat-item"><div class="stat-num">4</div><div class="stat-lbl">קליקים לשליחת הזמנות</div></div>
+    <div class="stat-item"><div class="stat-num">הכל</div><div class="stat-lbl">הכל סגור בראש שקט</div></div>
+    <div class="stat-item"><div class="stat-num">0</div><div class="stat-lbl">אקסלים · 0 כאב ראש</div></div>
+  </div>
+</div>
+
+<!-- PRODUCT SHOWCASE -->
+<section class="preview-section">
+  <div class="section-inner" style="text-align:center;">
+    <span class="section-tag">ככה זה נראה</span>
+    <h2 class="section-h2" style="margin:0 auto 12px;">לא הבטחה.<br><em>המוצר עצמו.</em></h2>
+    <p class="section-sub" style="margin:0 auto;">ככה אורח מקבל הזמנה, וככה זה נראה אצלכם בדשבורד — בזמן אמת.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px;text-align:right;">
+
+      <!-- WhatsApp mockup -->
+      <div class="preview-box" style="margin:0;max-width:none;">
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:0.05em;margin-bottom:14px;">מה האורח מקבל ב-WhatsApp</div>
+        <div style="background:#0b141a;border-radius:14px;padding:16px;">
+          <div style="background:#005c4b;color:#fff;border-radius:12px 12px 2px 12px;padding:12px 14px;font-size:13px;line-height:1.85;margin-bottom:8px;max-width:94%;margin-right:0;margin-left:auto;white-space:pre-line;">💍 <b>מיכל ויוסי</b>
+
+היי דנה! 😊
+
+נשמח מאוד לראות אתכם ביום המיוחד שלנו.
+
+📅 12 בספטמבר 2026
+🕒 19:30
+📍 אולם הגן הקסום
+
+💌 לאישור הגעה לחצו כאן:
+loviva.app/r/d8k2
+
+מחכים לראותכם! 🎉</div>
+          <div style="background:#202c33;color:#e9edef;border-radius:12px 12px 12px 2px;padding:10px 14px;font-size:13.5px;display:inline-block;">מגיעים בשמחה! 🎉</div>
+        </div>
+        <div class="preview-check" style="margin-top:14px;">
+          <div class="check-icon check-on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          הודעה מלאה עם תאריך, שעה, מקום וקישור אישי — לא רק לינק יבש
+        </div>
+      </div>
+
+      <!-- Dashboard mockup -->
+      <div class="preview-box" style="margin:0;max-width:none;">
+        <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:0.05em;margin-bottom:14px;">מה אתם רואים בדשבורד</div>
+        <div style="background:#0F1115;border:1px solid rgba(200,169,126,0.15);border-radius:14px;padding:16px;">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:44px;font-weight:800;color:#C8A97E;line-height:1;">74%</div>
+            <div style="font-size:12px;color:rgba(248,250,252,0.5);margin-top:4px;">מהמוזמנים כבר ענו</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:#171A21;border:1px solid rgba(200,169,126,0.1);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#22C55E;">187</div>
+              <div style="font-size:10px;color:rgba(248,250,252,0.45);">אישרו הגעה</div>
+            </div>
+            <div style="background:#171A21;border:1px solid rgba(200,169,126,0.1);border-radius:10px;padding:10px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#F59E0B;">43</div>
+              <div style="font-size:10px;color:rgba(248,250,252,0.45);">ממתינים</div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-cta" style="margin-top:14px;">
+          <div class="preview-cta-title">האירוע שלכם בזמן אמת 🎉</div>
+          <div class="preview-cta-sub" style="margin-top:4px;">300 מוזמנים, הושבה ותזכורות — הכל מתעדכן לבד</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:0;">
+      <span class="section-tag">איך זה מרגיש</span>
+      <h2 class="section-h2" style="margin:0 auto 12px;">מהבלגן<br>אל <em>השקט</em></h2>
+      <p class="section-sub" style="margin:0 auto;">ארבעה שלבים, ואז אתם פשוט מתפנים להתרגש.</p>
+    </div>
+    <div class="how-steps">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="step-title">פותחים אירוע</div>
+        <div class="step-desc">שם, תאריך, אולם — ואתם כבר נושמים לרווחה.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="step-title">מעלים מוזמנים</div>
+        <div class="step-desc">מאקסל, ידני, או לפי משפחות — בלי לפספס אף אחד.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div class="step-title">שולחים הזמנות</div>
+        <div class="step-desc">קישור אישי לכל אורח, בכפתור אחד — וזהו, זה מאחוריכם.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="step-title">מקבלים אישורים</div>
+        <div class="step-desc">בזמן אמת, בלי שתעשו כלום ובלי לבדוק כל חמש דקות.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="text-align:center;">
+      <span class="section-tag">למה זה מרגיש אחרת</span>
+      <h2 class="section-h2">פחות לעשות.<br><em>יותר ליהנות.</em></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+        <div class="feat-title">בלי לרדוף אחרי אף אחד</div>
+        <div class="feat-desc">כל אורח מקבל הזמנה אישית, והמערכת מזכירה למי שלא ענה — אתם לא מרימים טלפון אף פעם.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v8M18 2v8M4 10h16M6 10v10M18 10v10M8 20h8"/></svg></div>
+        <div class="feat-title">בלי ריבים על מי יושב איפה</div>
+        <div class="feat-desc">המערכת מסדרת לבד מי יושב עם מי, מכבדת משפחות ו-VIP — אתם רק מאשרים בסוף.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="feat-title">סוף לבלגן של "מי כבר ענה?"</div>
+        <div class="feat-desc">כל משפחה במקום אחד — יודעים בדיוק מי מגיע, בלי לחפש בין עשרות הודעות וואטסאפ.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="feat-title">ראש שקט שלא שכחתם כלום</div>
+        <div class="feat-desc">כל מה שצריך לסדר לפני החתונה במקום אחד, כדי שלא תתעוררו בלילה בבהלה.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="feat-title">תמיד יודעים איפה אתם עומדים</div>
+        <div class="feat-desc">מבט אחד מספיק כדי לדעת בדיוק כמה מגיעים — בלי לספור הודעות וואטסאפ בעצמכם.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+        <div class="feat-title">כניסה חכמה עם ברקוד <span style="display:inline-flex;align-items:center;gap:3px;
+  background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);
+  color:#C8A97E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;
+  margin-right:6px;vertical-align:middle;">Grand</span></div>
+        <div class="feat-desc">אורחים נכנסים ויודעים איפה לשבת תוך שנייה — בלי תורים ובלי בלבול בכניסה.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="2"/></svg></div>
+        <div class="feat-title">מסך יום האירוע <span style="display:inline-flex;align-items:center;gap:3px;
+  background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);
+  color:#C8A97E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;
+  margin-right:6px;vertical-align:middle;">Grand</span></div>
+        <div class="feat-desc">ביום החתונה אתם רוקדים, לא רצים עם רשימות — הכל מתעדכן לבד בזמן אמת.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+        <div class="feat-title">אלבום שיתופי <span style="display:inline-flex;align-items:center;gap:3px;
+  background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);
+  color:#C8A97E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;
+  margin-right:6px;vertical-align:middle;">Grand</span></div>
+        <div class="feat-desc">יום אחרי החתונה, כל התמונות שהאורחים צילמו מגיעות אליכם בלחיצה אחת.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<!-- SOCIAL PROOF -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:48px;">
+      <span class="section-tag">זוגות מרוצים</span>
+      <h2 class="section-h2">הם כבר ניהלו<br><em>את החתונה שלהם</em></h2>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:48px;text-align:center;">
+      <div style="padding:24px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;">
+        <div style="font-size:42px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:6px;">284</div>
+        <div style="font-size:12px;color:var(--gray);">מתוך 312 מוזמנים<br>אישרו הגעה</div>
+      </div>
+      <div style="padding:24px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;">
+        <div style="font-size:42px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:6px;">91%</div>
+        <div style="font-size:12px;color:var(--gray);">שיעור אישורים<br>ממוצע במערכת</div>
+      </div>
+      <div style="padding:24px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:18px;">
+        <div style="font-size:42px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:6px;">8+</div>
+        <div style="font-size:12px;color:var(--gray);">שעות עבודה<br>שנחסכות בממוצע</div>
+      </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:24px;">
+        <div style="color:var(--gold);font-size:18px;margin-bottom:12px;">★★★★★</div>
+        <p style="font-size:14px;color:var(--white);line-height:1.8;margin-bottom:16px;font-style:italic;">
+          "Loviva פשוט חסכה לנו ימים של טלפונים וכאב ראש. כל האישורים הגיעו אוטומטית ובלי שאנחנו רדפנו אחרי אף אחד."
+        </p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,126,0.3),rgba(200,169,126,0.1));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold);">יל</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);">ירון ולבנה</div>
+            <div style="font-size:12px;color:var(--gray);">312 מוזמנים · תל אביב</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:24px;">
+        <div style="color:var(--gold);font-size:18px;margin-bottom:12px;">★★★★★</div>
+        <p style="font-size:14px;color:var(--white);line-height:1.8;margin-bottom:16px;font-style:italic;">
+          "ממליצה לכל זוג! הושבה החכמה הצילה אותנו — המערכת שיבצה 280 אנשים לשולחנות תוך שניות. בלי זה היינו משתגעות."
+        </p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,126,0.3),rgba(200,169,126,0.1));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold);">מד</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);">מיכאל ודנה</div>
+            <div style="font-size:12px;color:var(--gray);">280 מוזמנים · חיפה</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:24px;">
+        <div style="color:var(--gold);font-size:18px;margin-bottom:12px;">★★★★★</div>
+        <p style="font-size:14px;color:var(--white);line-height:1.8;margin-bottom:16px;font-style:italic;">
+          "השתמשנו ב-Loviva ולא הייתי מאמינה כמה זה מוריד לחץ. בלחיצה אחת שלחנו הזמנות ל-450 איש. פשוט וואו."
+        </p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,126,0.3),rgba(200,169,126,0.1));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold);">רנ</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);">רועי ונועה</div>
+            <div style="font-size:12px;color:var(--gray);">450 מוזמנים · ירושלים</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner">
+    <div style="text-align:center;">
+      <span class="section-tag">תמחור</span>
+      <h2 class="section-h2">תשלום חד פעמי.<br><em>ללא מנוי.</em></h2>
+      <p class="section-sub" style="margin:0 auto;">המערכת בוחרת אוטומטית את החבילה לפי מספר המוזמנים — בממוצע פחות מ-1₪ לאורח.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- STARTER -->
+      <div class="plan-card">
+        <div class="plan-name">STARTER</div>
+        <div class="plan-price"><span class="plan-price-num">99</span><span class="plan-price-sym">₪</span></div>
+        <div class="plan-sub">חד פעמי לאירוע</div>
+        <div class="plan-cap" style="font-size:15px;font-weight:700;color:var(--gold2);">עד 100 מוזמנים</div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> ניהול מוזמנים מלא</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> הושבה חכמה ושיבוץ שולחנות</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> רשימת משימות לחתונה</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> דוחות וייצוא Excel</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> תמיכה מלאה בעברית</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.3);"><span style="opacity:0.4;">✗</span> שליחת הזמנות WhatsApp אוטומטית</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.3);"><span style="opacity:0.4;">✗</span> תזכורות אוטומטיות</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.35);font-size:12px;">🔒 כניסה חכמה זמינה כתוספת (+50₪)</div>
+        </div>
+        <button class="btn-plan-outline" onclick="window.location.href='app.html'">התחילו</button>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="plan-card featured">
+        <div class="plan-badge">הכי פופולרי</div>
+        <div class="plan-name">PREMIUM</div>
+        <div class="plan-price"><span class="plan-price-num">199</span><span class="plan-price-sym">₪</span></div>
+        <div class="plan-sub">חד פעמי לאירוע</div>
+        <div class="plan-cap" style="font-size:15px;font-weight:700;color:var(--gold2);">עד 500 מוזמנים</div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> ניהול מוזמנים מלא</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> הושבה חכמה ושיבוץ שולחנות</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> רשימת משימות לחתונה</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> דוחות וייצוא Excel</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> תמיכה מלאה בעברית</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon">★</span> שליחת 500 הזמנות בלחיצת כפתור</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> אישורי הגעה אוטומטיים ב-WhatsApp</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> תזכורת אוטומטית אחרי 7 ימים</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.35);font-size:12px;">🔒 כניסה חכמה זמינה כתוספת (+50₪)</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.35);font-size:12px;">🔒 מסך יום האירוע זמין כתוספת (+50₪)</div>
+        </div>
+        <button class="btn-plan-gold" onclick="window.location.href='app.html'">בחרו Premium →</button>
+      </div>
+
+      <!-- GRAND -->
+      <div class="plan-card" style="border-color:rgba(200,169,126,0.4);background:linear-gradient(135deg,rgba(200,169,126,0.07),transparent);">
+        <div class="plan-badge" style="background:linear-gradient(135deg,#C8A97E,#9A7A52);color:#111;">✦ הכל כלול</div>
+        <div class="plan-name">GRAND</div>
+        <div class="plan-price"><span class="plan-price-num">249</span><span class="plan-price-sym">₪</span></div>
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(200,169,126,0.12);
+          border:1px solid rgba(200,169,126,0.3);border-radius:100px;
+          padding:4px 12px;margin:6px 0 8px;">
+          <span style="font-size:12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M2 8.5l10 7 10-7"/></svg></span>
+          <span style="font-size:11px;font-weight:700;color:#C8A97E;">הכי הרבה ערך — רק 50₪ יותר מ-Premium</span>
+        </div>
+        <div class="plan-sub">חד פעמי לאירוע</div>
+        <div class="plan-cap" style="font-size:15px;font-weight:700;color:var(--gold2);">ללא הגבלת מוזמנים</div>
+        <div class="plan-features">
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> ניהול מוזמנים מלא</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> הושבה חכמה ושיבוץ שולחנות</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> רשימת משימות לחתונה</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> דוחות וייצוא Excel</div>
+          <div class="plan-feat"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> תמיכה מלאה בעברית</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="#C8A97E" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span> מוזמנים ללא הגבלה</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span> שליחת הזמנות בלחיצת כפתור</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> אישורי הגעה אוטומטיים ב-WhatsApp</div>
+          <div class="plan-feat" style="color:var(--gold2);"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> תזכורת אוטומטית אחרי 7 ימים</div>
+          <div class="plan-feat" style="color:#22C55E;font-weight:700;"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="3" height="16"/><rect x="7" y="4" width="1" height="16"/><rect x="10" y="4" width="2" height="16"/><rect x="14" y="4" width="1" height="16"/><rect x="17" y="4" width="3" height="16"/></svg></span> כניסה מהירה עם ברקוד אישי לכל מוזמן <span style="font-size:11px;background:rgba(34,197,94,0.15);padding:2px 7px;border-radius:100px;">בלעדי</span></div>
+          <div class="plan-feat" style="color:#22C55E;font-weight:700;"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> מסך ניהול מיוחד ליום האירוע <span style="font-size:11px;background:rgba(34,197,94,0.15);padding:2px 7px;border-radius:100px;">בלעדי</span></div>
+          <div class="plan-feat" style="color:#22C55E;font-weight:700;border-top:1px solid rgba(34,197,94,0.15);padding-top:10px;margin-top:4px;"><span class="plan-feat-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> אלבום שיתופי — המוזמנים מעלים תמונות <span style="font-size:11px;background:rgba(34,197,94,0.15);padding:2px 7px;border-radius:100px;">בלעדי</span></div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.5);font-size:12px;padding-right:20px;">יום אחרי האירוע כולם מקבלים קישור לשיתוף תמונות וברכות — הכל מגיע ישירות אליכם</div>
+          <div class="plan-feat" style="color:rgba(248,250,252,0.4);font-size:12px;border-top:1px solid rgba(200,169,126,0.1);padding-top:10px;margin-top:4px;">🤯 Premium + ברקוד = 249₪ = Grand. אותו מחיר!</div>
+        </div>
+        <button class="btn-plan-gold" style="background:linear-gradient(135deg,#C8A97E,#9A7A52);" onclick="window.location.href='app.html'">בחרו Grand — הכי שווה ←</button>
+      </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="obj-grid">
+      <div class="obj-item"><span class="obj-check">✓</span> ללא התחייבות</div>
+      <div class="obj-item"><span class="obj-check">✓</span> ללא מנוי חודשי</div>
+      <div class="obj-item"><span class="obj-check">✓</span> משלמים רק כשמוכנים</div>
+      <div class="obj-item"><span class="obj-check">✓</span> תמיכה מלאה בעברית</div>
+      <div class="obj-item"><span class="obj-check">✓</span> גישה לארכיון לכל החיים</div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);">
+  <div class="section-inner" style="text-align:center;">
+    <span class="section-tag">שאלות נפוצות</span>
+    <h2 class="section-h2">יש לכם שאלות?<br><em>יש לנו תשובות.</em></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          האם צריך לשלם כדי להתחיל? <span>+</span>
+        </button>
+        <div class="faq-a">לא. כל המערכת פתוחה בחינם. מוסיפים מוזמנים, בונים הושבה, רואים דשבורד — הכל בלי תשלום. משלמים רק כאשר לוחצים "שלח הזמנות ב-WhatsApp".</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          איך המערכת בוחרת את החבילה? <span>+</span>
+        </button>
+        <div class="faq-a">אוטומטית לפי מספר המוזמנים שהזנתם. עד 100 — Starter (99₪). עד 500 — Premium (199₪). ללא הגבלה — Grand (249₪).</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          האם אפשר לייבא מאקסל? <span>+</span>
+        </button>
+        <div class="faq-a">כן. ייבוא ישיר מקובצי Excel ו-CSV. גם ניתן להוסיף ידנית או לפי משפחות.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          מה קורה אחרי החתונה? <span>+</span>
+        </button>
+        <div class="faq-a">האירוע עובר לארכיון. ניתן לראות את כל המוזמנים, הסטטיסטיקות וההושבה לנצח. הגישה נשמרת לכל החיים.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          כמה זמן לוקח להתחיל? <span>+</span>
+        </button>
+        <div class="faq-a">פחות מ-2 דקות. יוצרים חשבון, מזינים פרטי האירוע ומתחילים להוסיף מוזמנים.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="cta-content">
+    <h2 class="cta-h2">מוכנים לחסוך<br>שעות של כאב ראש?</h2>
+    <p class="cta-sub">הצטרפו לזוגות שכבר ניהלו את החתונה שלהם בשקט.</p>
+    <button class="btn-primary" onclick="window.location.href='app.html'" style="font-size:17px;padding:18px 48px;">
+      פתחו את האירוע שלכם ←
+    </button>
+    <div class="obj-grid" style="margin-top:24px;">
+      <div class="obj-item"><span class="obj-check">✓</span> ללא כרטיס אשראי</div>
+      <div class="obj-item"><span class="obj-check">✓</span> ללא התחייבות</div>
+      <div class="obj-item"><span class="obj-check">✓</span> תמיכה בעברית</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item"><span class="trust-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> מאובטח לחלוטין</div>
+    <div class="trust-item"><span class="trust-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> פיתוח ישראלי</div>
+    <div class="trust-item"><span class="trust-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> WhatsApp מובנה</div>
+    <div class="trust-item"><span class="trust-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2"/></svg></span> Mobile First</div>
+    <div class="trust-item"><span class="trust-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> תמיכה בעברית</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" alt="Loviva">
+  <p>© 2025 Loviva · דור מרד, עוסק פטור · Less Stress. More Love.<br>
+  <div style="margin-top:8px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="legal.html" style="color:rgba(200,169,126,0.5);font-size:11px;text-decoration:none;">תקנון שימוש</a>
+    <a href="legal.html#privacy" onclick="localStorage.setItem('lv_legal_tab','privacy')" style="color:rgba(200,169,126,0.5);font-size:11px;text-decoration:none;">מדיניות פרטיות</a>
+    <a href="legal.html" style="color:rgba(200,169,126,0.5);font-size:11px;text-decoration:none;">ביטולים והחזרים</a>
+    <a href="legal.html" style="color:rgba(200,169,126,0.5);font-size:11px;text-decoration:none;">יצירת קשר</a>
+  </div></p>
+</footer>
+
+<!-- Sticky Mobile CTA -->
+<div class="sticky-cta" id="stickyCta">
+  <button class="btn-primary" onclick="window.location.href='app.html'">שלחו את ההזמנה הראשונה ←</button>
+  <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.45);margin-top:6px;">ללא כרטיס אשראי · משלמים רק כשמשלחים</div>
+</div>
+
+<!-- WhatsApp Float -->
+<a href="https://wa.me/972555629208?text=שלום, יש לי שאלה על Loviva"
+  id="whatsappFloat"
+  target="_blank" rel="noopener"
+  style="position:fixed;bottom:24px;left:24px;z-index:999;width:56px;height:56px;
+    border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 24px rgba(37,211,102,0.45);text-decoration:none;font-size:26px;">
+  💬
+</a>
+
+<script>
+function toggleFaq(btn) {
+  btn.classList.toggle('open');
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('open');
+}
+</script>
+
+<script>
+(function(){
+  var sticky = document.getElementById('stickyCta');
+  var hero = document.querySelector('.hero');
+  var finalCta = document.querySelector('.cta-section');
+  if(!sticky || !hero) return;
+  function update(){
+    var heroBottom = hero.getBoundingClientRect().bottom;
+    var pastHero = heroBottom < 0;
+    var nearFinalCta = finalCta && finalCta.getBoundingClientRect().top < window.innerHeight;
+    sticky.classList.toggle('visible', pastHero && !nearFinalCta);
+  }
+  window.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+</script>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+}
+</script>
+<!-- Cookie Banner -->
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
+  background:#171A21;border-top:1px solid rgba(200,169,126,0.2);
+  padding:14px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+  <p style="font-size:13px;color:rgba(248,250,252,0.7);flex:1;line-height:1.6;">
+    אנחנו משתמשים בעוגיות לשיפור חוויית השימוש.
+    <a href="legal.html" style="color:#C8A97E;">מדיניות פרטיות</a>
+  </p>
+  <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('lv_cookies','declined')"
+    style="padding:8px 16px;border-radius:10px;background:transparent;color:rgba(248,250,252,0.5);
+    border:1px solid rgba(248,250,252,0.15);font-family:Heebo,sans-serif;font-size:13px;cursor:pointer;">דחה</button>
+  <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('lv_cookies','accepted')"
+    style="padding:8px 18px;border-radius:10px;background:#C8A97E;color:#111;border:none;
+    font-family:Heebo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">אישור ✓</button>
+</div>
+<script>
+(function(){{
+  if(!localStorage.getItem('lv_cookies')){{
+    setTimeout(()=>{{
+      var b=document.getElementById('cookieBanner');
+      if(b) b.style.display='flex';
+    }},2000);
+  }}
+}})();
+</script>
+</body>
+</html>
