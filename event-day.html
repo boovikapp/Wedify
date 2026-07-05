@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0F1115">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Loviva">
+<title>יום האירוע — Loviva</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{direction:rtl;background:#0A0C0F;}
+body{font-family:'Heebo',sans-serif;background:#0A0C0F;color:#F8FAFC;
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;}
+
+/* TOP BAR */
+.topbar{background:#111318;border-bottom:2px solid rgba(200,169,126,0.3);
+  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+  padding-top:max(12px,env(safe-area-inset-top));}
+.topbar img{height:30px;}
+.event-name{font-size:15px;font-weight:800;color:#F8FAFC;text-align:center;flex:1;}
+.top-stats{display:flex;gap:12px;align-items:center;}
+.top-stat{text-align:center;}
+.top-stat-num{font-size:18px;font-weight:800;line-height:1;}
+.top-stat-lbl{font-size:9px;color:rgba(248,250,252,0.5);}
+
+/* SEARCH */
+.search-bar{padding:12px 16px;background:#111318;border-bottom:1px solid rgba(200,169,126,0.1);
+  position:sticky;top:56px;z-index:40;}
+.search-input{width:100%;padding:12px 16px;border-radius:14px;
+  border:1.5px solid rgba(200,169,126,0.2);background:#1A1D24;
+  color:#F8FAFC;font-family:'Heebo',sans-serif;font-size:16px;
+  outline:none;}
+.search-input::placeholder{color:rgba(248,250,252,0.3);}
+.search-input:focus{border-color:#C8A97E;}
+
+/* TABS */
+.tabs{display:flex;background:#111318;border-bottom:1px solid rgba(200,169,126,0.1);
+  position:sticky;top:112px;z-index:39;}
+.tab-btn{flex:1;padding:12px;font-family:'Heebo',sans-serif;font-size:13px;
+  font-weight:600;border:none;background:transparent;
+  color:rgba(248,250,252,0.5);border-bottom:2px solid transparent;cursor:pointer;}
+.tab-btn.active{color:#C8A97E;border-bottom-color:#C8A97E;}
+
+/* GUEST LIST */
+.list{padding:8px 12px 80px;}
+.guest-row{display:flex;align-items:center;gap:12px;
+  padding:14px 12px;border-radius:14px;margin-bottom:6px;
+  background:#171A21;border:1px solid rgba(248,250,252,0.05);
+  cursor:pointer;transition:all 0.15s;}
+.guest-row:active{background:#1E2028;}
+.guest-row.arrived{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);}
+.av{width:44px;height:44px;border-radius:50%;background:rgba(200,169,126,0.1);
+  border:1.5px solid rgba(200,169,126,0.2);display:flex;align-items:center;
+  justify-content:center;font-size:15px;font-weight:700;color:#C8A97E;flex-shrink:0;}
+.av.confirmed{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#22C55E;}
+.guest-info{flex:1;}
+.guest-name{font-size:15px;font-weight:700;color:#F8FAFC;margin-bottom:2px;}
+.guest-meta{font-size:12px;color:rgba(248,250,252,0.45);}
+.guest-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.tbl-chip{background:rgba(200,169,126,0.15);border:1px solid rgba(200,169,126,0.3);
+  color:#C8A97E;font-size:13px;font-weight:700;padding:4px 10px;border-radius:100px;}
+.badge{display:inline-flex;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(34,197,94,0.12);color:#22C55E;}
+.badge-amber{background:rgba(245,158,11,0.12);color:#F59E0B;}
+.badge-gray{background:rgba(248,250,252,0.06);color:rgba(248,250,252,0.4);}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 24px;}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+.empty-title{font-size:16px;font-weight:700;color:#F8FAFC;margin-bottom:6px;}
+.empty-sub{font-size:13px;color:rgba(248,250,252,0.4);}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 24px;}
+.spinner{width:36px;height:36px;border:3px solid rgba(200,169,126,0.2);
+  border-top-color:#C8A97E;border-radius:50%;
+  animation:spin 0.8s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* BOTTOM ACTION */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;
+  background:#111318;border-top:1px solid rgba(200,169,126,0.15);
+  padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));
+  display:flex;gap:10px;}
+.btn-gold{background:#C8A97E;color:#111;border:none;border-radius:12px;
+  padding:13px 20px;font-family:'Heebo',sans-serif;font-size:14px;
+  font-weight:700;cursor:pointer;flex:1;}
+.btn-ghost{background:transparent;color:rgba(248,250,252,0.6);
+  border:1.5px solid rgba(248,250,252,0.1);border-radius:12px;
+  padding:13px 16px;font-family:'Heebo',sans-serif;font-size:13px;
+  font-weight:600;cursor:pointer;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-box{width:100%;max-width:380px;background:#171A21;border:1px solid rgba(200,169,126,0.15);border-radius:24px;padding:28px;}
+.form-label{font-size:12px;font-weight:600;color:rgba(248,250,252,0.5);display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid rgba(248,250,252,0.08);border-radius:12px;background:#1E2028;color:#F8FAFC;font-family:'Heebo',sans-serif;font-size:14px;outline:none;margin-bottom:14px;}
+.form-input:focus{border-color:#C8A97E;}
+.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#EF4444;margin-bottom:14px;display:none;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#171A21;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:480px;}
+.modal-title{font-size:18px;font-weight:800;color:#F8FAFC;margin-bottom:16px;}
+.companions-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;}
+.comp-btn{padding:10px;border-radius:10px;border:1.5px solid rgba(248,250,252,0.1);background:transparent;color:rgba(248,250,252,0.6);font-family:'Heebo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
+.comp-btn.sel{border-color:#C8A97E;background:rgba(200,169,126,0.15);color:#C8A97E;}
+</style>
+</head>
+<body>
+<div style="padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));position:sticky;top:0;z-index:100;background:rgba(15,17,21,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,169,126,0.1);">
+  <button onclick="history.back()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:rgba(248,250,252,0.6);font-family:'Heebo',sans-serif;font-size:14px;font-weight:600;cursor:pointer;padding:0;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    חזור
+  </button>
+</div>
+
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" style="height:44px;object-fit:contain;margin-bottom:12px;">
+      <div style="font-size:20px;font-weight:800;color:#F8FAFC;">מצב יום האירוע</div>
+      <div style="font-size:13px;color:rgba(248,250,252,0.5);margin-top:4px;">התחברו לניהול האירוע</div>
+    </div>
+    <div id="loginErr" class="err"></div>
+    <label class="form-label">אימייל</label>
+    <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com" dir="ltr">
+    <label class="form-label">סיסמה</label>
+    <input class="form-input" id="loginPass" type="password" placeholder="••••••••">
+    <button class="btn-gold" style="width:100%;margin-top:4px;" id="loginBtn" onclick="doLogin()">כניסה ←</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appWrap" style="display:none;">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=" alt="Loviva">
+    <div class="event-name" id="eventName">טוען...</div>
+    <div class="top-stats">
+      <div class="top-stat">
+        <div class="top-stat-num" id="statConfirmed" style="color:#22C55E;">0</div>
+        <div class="top-stat-lbl">הגיעו</div>
+      </div>
+      <div class="top-stat">
+        <div class="top-stat-num" id="statPending" style="color:#F59E0B;">0</div>
+        <div class="top-stat-lbl">ממתינים</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-bar">
+    <input class="search-input" id="searchInput" 
+      placeholder="🔍  חיפוש לפי שם..." 
+      oninput="renderList()" autocomplete="off">
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-all"       onclick="setTab('all')">הכל</button>
+    <button class="tab-btn"        id="tab-confirmed" onclick="setTab('confirmed')">אישרו</button>
+    <button class="tab-btn"        id="tab-pending"   onclick="setTab('pending')">ממתינים</button>
+    <button class="tab-btn"        id="tab-declined"  onclick="setTab('declined')">לא מגיעים</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="list" id="guestList"></div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <button class="btn-ghost" onclick="window.location.href='app.html'">← דשבורד</button>
+    <button class="btn-gold" onclick="refreshData()">🔄 רענן</button>
+  </div>
+</div>
+
+<!-- GUEST MODAL -->
+<div class="modal-overlay" id="guestModal">
+  <div class="modal">
+    <div class="modal-title" id="modalGuestName">שם האורח</div>
+    <div style="font-size:13px;color:rgba(248,250,252,0.5);margin-bottom:16px;" id="modalGuestMeta"></div>
+    <div style="font-size:14px;font-weight:600;color:#F8FAFC;margin-bottom:10px;">מספר מגיעים בפועל:</div>
+    <div class="companions-grid" id="compGrid"></div>
+    <button class="btn-gold" style="width:100%;" onclick="confirmArrival()">✓ אשר הגעה</button>
+    <button class="btn-ghost" style="width:100%;margin-top:8px;" onclick="closeModal()">סגור</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let me=null, eventData=null, contacts=[], guests=[], curTab='all', selContact=null;
+let authToken=null;
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  const btn   = document.getElementById('loginBtn');
+  err.style.display='none';
+  if(!email||!pass){ err.textContent='נא למלא אימייל וסיסמה'; err.style.display='block'; return; }
+  btn.textContent='מתחברים...'; btn.disabled=true;
+  try {
+    const resp = await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify({email,password:pass})
+    });
+    const json = await resp.json();
+    btn.textContent='כניסה ←'; btn.disabled=false;
+    if(!resp.ok||json.error){ err.textContent=json.error_description||'אימייל או סיסמה שגויים'; err.style.display='block'; return; }
+    authToken = json.access_token;
+    localStorage.setItem('ld_token', authToken);
+    await loadApp(json.user.id);
+  } catch(e) {
+    btn.textContent='כניסה ←'; btn.disabled=false;
+    err.textContent='שגיאת רשת'; err.style.display='block';
+  }
+}
+
+// ── LOAD ──
+async function loadApp(userId) {
+  const {data:profile} = await sb.from('users').select('*').eq('auth_id', userId).single();
+  if(!profile){ return; }
+  me = profile;
+  const {data:ev} = await sb.from('events').select('*').eq('user_id', profile.id).single();
+  eventData = ev;
+  if(ev) {
+    document.getElementById('eventName').textContent = (profile.bride_name||'') + ' ו' + (profile.groom_name||'');
+    const [cs, gs] = await Promise.all([
+      sb.from('contacts').select('*').eq('event_id', ev.id),
+      sb.from('guests').select('*').eq('event_id', ev.id)
+    ]);
+    contacts = cs.data||[];
+    guests   = gs.data||[];
+  }
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('appWrap').style.display='block';
+  updateStats();
+  renderList();
+}
+
+// ── STATS ──
+function updateStats() {
+  const conf = guests.filter(g=>g.status==='confirmed').length;
+  const pend = contacts.filter(c=>!guests.find(g=>g.contact_id===c.id)).length;
+  document.getElementById('statConfirmed').textContent = conf;
+  document.getElementById('statPending').textContent = pend;
+}
+
+// ── TABS ──
+function setTab(tab) {
+  curTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  renderList();
+}
+
+// ── RENDER LIST ──
+function renderList() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const list = document.getElementById('guestList');
+  
+  // Merge contacts + guests
+  let items = contacts.map(c => {
+    const g = guests.find(x=>x.contact_id===c.id);
+    return {...c, guest: g, status: g?.status||'pending', table_number: g?.table_number};
+  });
+
+  // Filter by tab
+  if (curTab==='confirmed') items = items.filter(i=>i.status==='confirmed');
+  else if (curTab==='pending')   items = items.filter(i=>i.status==='pending');
+  else if (curTab==='declined')  items = items.filter(i=>i.status==='declined');
+
+  // Filter by search
+  if (q) items = items.filter(i=>(i.first_name+' '+i.last_name).toLowerCase().includes(q));
+
+  // Sort: pending first, then confirmed, then declined
+  items.sort((a,b) => {
+    const order = {pending:0,confirmed:1,declined:2};
+    return (order[a.status]||0)-(order[b.status]||0);
+  });
+
+  if (!items.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div>
+      <div class="empty-title">לא נמצאו תוצאות</div>
+      <div class="empty-sub">נסו לחפש בשם אחר</div></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(c => {
+    const initials = (c.first_name[0]||'')+(c.last_name?.[0]||'');
+    const badge = c.status==='confirmed'
+      ? `<span class="badge badge-green">✓ הגיע</span>`
+      : c.status==='declined'
+      ? `<span class="badge badge-gray">לא מגיע</span>`
+      : `<span class="badge badge-amber">ממתין</span>`;
+    const tbl = c.table_number ? `<div class="tbl-chip">שולחן ${c.table_number}</div>` : '';
+    return `<div class="guest-row ${c.status==='confirmed'?'arrived':''}" onclick="openGuest('${c.id}')">
+      <div class="av ${c.status==='confirmed'?'confirmed':''}">${initials}</div>
+      <div class="guest-info">
+        <div class="guest-name">${c.first_name} ${c.last_name||''}</div>
+        <div class="guest-meta">${c.category||''} · ${c.guests_count||1} מוזמנים</div>
+      </div>
+      <div class="guest-right">${badge}${tbl}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── GUEST MODAL ──
+function openGuest(id) {
+  selContact = contacts.find(c=>c.id===id);
+  if(!selContact) return;
+  const g = guests.find(x=>x.contact_id===id);
+  document.getElementById('modalGuestName').textContent = selContact.first_name+' '+(selContact.last_name||'');
+  document.getElementById('modalGuestMeta').textContent = 
+    (selContact.category||'')+' · שולחן '+(g?.table_number||'לא שובץ');
+  
+  const max = selContact.guests_count||1;
+  const curr = g?.companions!==undefined ? g.companions+1 : max;
+  const grid = document.getElementById('compGrid');
+  grid.innerHTML = Array.from({length:Math.min(max,10)},(_,i)=>i+1).map(n=>
+    `<button class="comp-btn ${n===curr?'sel':''}" onclick="selComp(this,${n})">${n}</button>`
+  ).join('');
+  
+  document.getElementById('guestModal').classList.add('open');
+}
+
+function selComp(btn, n) {
+  document.querySelectorAll('.comp-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function closeModal() {
+  document.getElementById('guestModal').classList.remove('open');
+  selContact = null;
+}
+
+async function confirmArrival() {
+  if(!selContact) return;
+  const selBtn = document.querySelector('.comp-btn.sel');
+  const companions = selBtn ? parseInt(selBtn.textContent)-1 : 0;
+  
+  const existing = guests.find(g=>g.contact_id===selContact.id);
+  if(existing) {
+    await sb.from('guests').update({status:'confirmed',companions}).eq('id',existing.id);
+    existing.status='confirmed'; existing.companions=companions;
+  } else {
+    const {data} = await sb.from('guests').insert({
+      event_id: eventData.id,
+      contact_id: selContact.id,
+      first_name: selContact.first_name,
+      last_name: selContact.last_name||'',
+      phone: selContact.phone,
+      status:'confirmed', companions
+    }).select().single();
+    if(data) guests.push(data);
+  }
+  closeModal();
+  updateStats();
+  renderList();
+}
+
+async function refreshData() {
+  if(!eventData) return;
+  const [cs,gs] = await Promise.all([
+    sb.from('contacts').select('*').eq('event_id',eventData.id),
+    sb.from('guests').select('*').eq('event_id',eventData.id)
+  ]);
+  contacts=cs.data||[]; guests=gs.data||[];
+  updateStats(); renderList();
+}
+
+// ── AUTO LOGIN ──
+window.onload = async () => {
+  const saved = localStorage.getItem('ld_token');
+  if(saved) {
+    try {
+      const resp = await fetch(SB_URL+'/auth/v1/user',{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+saved}
+      });
+      if(resp.ok) {
+        const user = await resp.json();
+        authToken = saved;
+        await loadApp(user.id);
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('ld_token');
+  }
+};
+
+// Prevent zoom
+document.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+let _lt=0;
+document.addEventListener('touchend',function(e){var n=Date.now();if(n-_lt<300)e.preventDefault();_lt=n;},{passive:false});
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js"));
+}
+</script>
+</body>
+</html>
