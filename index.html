@@ -50,11 +50,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;
 .nav-actions{display:flex;gap:10px;align-items:center;}
 .btn-nav-ghost{padding:8px 18px;border-radius:12px;border:1px solid var(--border);
   background:transparent;color:var(--gold2);font-size:14px;font-weight:600;
-  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;
+  min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
 .btn-nav-ghost:hover{background:rgba(200,169,126,0.1);border-color:var(--gold);}
 .btn-nav-gold{padding:8px 20px;border-radius:12px;border:none;
   background:var(--gold);color:#111;font-size:14px;font-weight:700;
-  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;}
+  font-family:'Heebo',sans-serif;cursor:pointer;transition:all 0.2s;
+  min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
 .btn-nav-gold:hover{background:var(--gold2);transform:translateY(-1px);}
 
 /* ── HERO ── */
@@ -647,8 +649,7 @@ loviva.app/r/d8k2
       </div>
 
       <!-- PREMIUM -->
-      <div class="plan-card featured">
-        <div class="plan-badge">הכי פופולרי</div>
+      <div class="plan-card">
         <div class="plan-name">PREMIUM</div>
         <div class="plan-price"><span class="plan-price-num">199</span><span class="plan-price-sym">₪</span></div>
         <div class="plan-sub">חד פעמי לאירוע</div>
@@ -669,8 +670,8 @@ loviva.app/r/d8k2
       </div>
 
       <!-- GRAND -->
-      <div class="plan-card" style="border-color:rgba(200,169,126,0.4);background:linear-gradient(135deg,rgba(200,169,126,0.07),transparent);">
-        <div class="plan-badge" style="background:linear-gradient(135deg,#C8A97E,#9A7A52);color:#111;">✦ הכל כלול</div>
+      <div class="plan-card featured" style="border-color:rgba(200,169,126,0.4);background:linear-gradient(135deg,rgba(200,169,126,0.07),transparent);">
+        <div class="plan-badge" style="background:linear-gradient(135deg,#C8A97E,#9A7A52);color:#111;">הכי פופולרי</div>
         <div class="plan-name">GRAND</div>
         <div class="plan-price"><span class="plan-price-num">249</span><span class="plan-price-sym">₪</span></div>
         <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(200,169,126,0.12);
@@ -842,17 +843,19 @@ if ('serviceWorker' in navigator) {
 <!-- Cookie Banner -->
 <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
   background:#171A21;border-top:1px solid rgba(200,169,126,0.2);
-  padding:14px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));display:none;align-items:center;gap:12px;flex-wrap:wrap;">
   <p style="font-size:13px;color:rgba(248,250,252,0.7);flex:1;line-height:1.6;">
     אנחנו משתמשים בעוגיות לשיפור חוויית השימוש.
     <a href="legal.html" style="color:#C8A97E;">מדיניות פרטיות</a>
   </p>
   <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('lv_cookies','declined')"
     style="padding:8px 16px;border-radius:10px;background:transparent;color:rgba(248,250,252,0.5);
-    border:1px solid rgba(248,250,252,0.15);font-family:Heebo,sans-serif;font-size:13px;cursor:pointer;">דחה</button>
+    border:1px solid rgba(248,250,252,0.15);font-family:Heebo,sans-serif;font-size:13px;cursor:pointer;
+    min-height:44px;display:inline-flex;align-items:center;justify-content:center;">דחה</button>
   <button onclick="document.getElementById('cookieBanner').style.display='none';localStorage.setItem('lv_cookies','accepted')"
     style="padding:8px 18px;border-radius:10px;background:#C8A97E;color:#111;border:none;
-    font-family:Heebo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">אישור ✓</button>
+    font-family:Heebo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+    min-height:44px;display:inline-flex;align-items:center;justify-content:center;">אישור ✓</button>
 </div>
 <script>
 (function(){

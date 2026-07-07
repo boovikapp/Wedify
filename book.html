@@ -197,7 +197,7 @@ gtag('config','G-VKNB4HCVVT');
           <div class="hero-c">
             <div class="hero-tag">✦ הזמנה לחתונה ✦</div>
             <div class="hero-names" id="heroNames">...</div>
-            <div class="hero-sub">שמחים להזמינכם לשמוח איתנו</div>
+            <div class="hero-sub" id="heroSub">שמחים להזמינכם לשמוח איתנו</div>
           </div>
         </div>
         <div class="dets">
@@ -379,9 +379,12 @@ function showRSVP() {
   var g = user_?.groom_name||'', b = user_?.bride_name||'';
   document.getElementById('heroNames').innerHTML = '<em>'+b+'</em> ו'+g;
   document.getElementById('guestName').textContent = contact_.first_name;
+  if (contact_?.first_name) {
+    document.getElementById('heroSub').textContent = 'הוזמנת, '+contact_.first_name+', לחגוג איתנו';
+  }
   if (event_?.event_date) {
     var d = new Date(event_.event_date);
-    document.getElementById('detDate').textContent = d.toLocaleDateString('he-IL',{day:'numeric',month:'numeric'});
+    document.getElementById('detDate').textContent = d.toLocaleDateString('he-IL',{day:'numeric',month:'long'});
   }
   if (event_?.event_time) document.getElementById('detTime').textContent = event_.event_time;
   if (event_?.venue) document.getElementById('detVenue').textContent = event_.venue;
