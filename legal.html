@@ -283,6 +283,24 @@ function showTab(name) {
   window.scrollTo({top:112,behavior:'smooth'});
 }
 
+(function initTab(){
+  const valid = ['terms','privacy','refund','contact'];
+  let tab = null;
+  const params = new URLSearchParams(window.location.search);
+  const queryTab = params.get('tab');
+  const hashTab = window.location.hash ? window.location.hash.slice(1) : '';
+  const storedTab = localStorage.getItem('lv_legal_tab');
+  if(queryTab && valid.includes(queryTab)){
+    tab = queryTab;
+  } else if(hashTab && valid.includes(hashTab)){
+    tab = hashTab;
+  } else if(storedTab && valid.includes(storedTab)){
+    tab = storedTab;
+  }
+  if(storedTab){ localStorage.removeItem('lv_legal_tab'); }
+  if(tab){ showTab(tab); }
+})();
+
 function sendContact() {
   const name  = document.getElementById('contactName').value.trim();
   const email = document.getElementById('contactEmail').value.trim();

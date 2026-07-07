@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0F1115">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Loviva">
@@ -19,13 +19,34 @@ window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
 gtag('config','G-VKNB4HCVVT');
-// Fire purchase conversion event
-gtag('event','purchase',{
-  transaction_id: new Date().getTime(),
-  value: new URLSearchParams(window.location.search).get('amount')||199,
-  currency: 'ILS',
-  items:[{item_name: new URLSearchParams(window.location.search).get('plan')||'Premium'}]
-});
+// Fire purchase conversion event (client-side dedupe guard only —
+// this does NOT replace server-side purchase verification)
+(function(){
+  const qs = window.location.search;
+  const qp = new URLSearchParams(qs);
+  const orderId = qp.get('order_id')||qp.get('orderId')||qp.get('transaction_id')||qp.get('order')||qp.get('id')||qp.get('ref');
+  let dedupeKey;
+  if(orderId){
+    dedupeKey = orderId;
+  } else {
+    let hash = 0;
+    for(let i=0;i<qs.length;i++){
+      hash = ((hash<<5)-hash + qs.charCodeAt(i))|0;
+    }
+    dedupeKey = 'qshash_'+hash;
+  }
+  const storageKey = 'lv_purchase_tracked_'+dedupeKey;
+  if(localStorage.getItem(storageKey)){
+    return; // already tracked this purchase — skip firing duplicate event
+  }
+  gtag('event','purchase',{
+    transaction_id: orderId || new Date().getTime(),
+    value: qp.get('amount')||199,
+    currency: 'ILS',
+    items:[{item_name: qp.get('plan')||'Premium'}]
+  });
+  localStorage.setItem(storageKey,'1');
+})();
 </script>
 
 <style>
