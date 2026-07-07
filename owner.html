@@ -287,6 +287,14 @@ body { font-family: 'Heebo', sans-serif; color: var(--text); background: var(--b
       <button class="mkt-filter-btn" onclick="setMktRange(0)" id="mkt-btn-0">כל הזמנים</button>
     </div>
 
+    <!-- Honest empty-state: the funnel/traffic metrics below need real event tracking
+         (landing_page_view / cta_clicked / etc.) which isn't wired up yet — the `contacts`
+         table only holds the guest list, not analytics events, so those queries return
+         nothing. This banner keeps the zeros below from being read as real performance. -->
+    <div id="mkt-no-data-banner" style="display:none;background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;font-weight:700;color:#92400e;">
+      ⚠️ אין נתונים זמינים כרגע — מעקב אנליטיקס (כניסות לאתר, קליקים, משפך המרות ומקורות תנועה) עדיין לא מחובר במערכת. נתוני "עסקים פעילים/משלמים" למטה כן אמיתיים ומבוססים על טבלת העסקים בפועל.
+    </div>
+
     <!-- KPI cards row 1 -->
     <div class="mkt-kpi-grid">
       <div class="mkt-kpi purple"><div class="mkt-kpi-num" id="kpi-visits">—</div><div class="mkt-kpi-label">👁️ כניסות לאתר</div></div>
@@ -671,8 +679,8 @@ function renderBusinesses() {
     return `<div class="biz-item" style="${biz.is_test ? 'opacity:0.65;' : ''}">
       <div class="biz-avatar">${nicheEmojis[niche]}</div>
       <div class="biz-info">
-        <div class="biz-name">${biz.name}</div>
-        <div class="biz-meta">📞 ${biz.phone||'—'} · ${nicheLabels[niche]} · נרשם ${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</div>
+        <div class="biz-name">${escapeHtml(bizName(biz))}</div>
+        <div class="biz-meta">📞 ${escapeHtml(biz.phone||'—')} · ${nicheLabels[niche]} · נרשם ${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</div>
       </div>
       ${trialHtml}
       <div class="action-btns">
@@ -725,7 +733,7 @@ function loadAccounting() {
     tbody.innerHTML = payingClients.map(biz => {
       const created = new Date(biz.created_at);
       return `<tr>
-        <td><strong>${biz.name}</strong></td>
+        <td><strong>${escapeHtml(bizName(biz))}</strong></td>
         <td>${nicheLabels[biz.niche||'other']}</td>
         <td>${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</td>
         <td><strong style="color:#059669;">₪129</strong></td>
@@ -817,7 +825,7 @@ function exportExcel() {
     ['שם העסק', 'תחום', 'תאריך הצטרפות', 'סכום'],
     ...payingClients.map(biz => {
       const created = new Date(biz.created_at);
-      return [biz.name, nicheLabels[biz.niche||'other'], `${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}`, 129];
+      return [bizName(biz), nicheLabels[biz.niche||'other'], `${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}`, 129];
     }),
     [''],
     ['סה"כ הכנסות', '', '', totalIncome],
@@ -897,6 +905,13 @@ async function loadMarketing() {
 
   mktEvents = events || [];
 
+  // The `contacts` table is the wedding guest list, not a funnel-events log — real rows never
+  // have `event_type`, so every count() below is honestly 0 against production data. Detect that
+  // and show a banner instead of presenting fabricated/zero funnel numbers as real performance.
+  const hasTrackingData = mktEvents.some(e => e.event_type);
+  const noDataBanner = document.getElementById('mkt-no-data-banner');
+  if (noDataBanner) noDataBanner.style.display = hasTrackingData ? 'none' : 'block';
+
   // Count event types
   const count = (type) => mktEvents.filter(e => e.event_type === type).length;
   const visits       = count('landing_page_view') || count('visit');
@@ -913,16 +928,16 @@ async function loadMarketing() {
   const registrations = sigCompleted || bizInRange.length;
   const activeBiz = allBusinesses.filter(b => !b.is_blocked && !b.is_test);
   const payingBiz = allBusinesses.filter(b => b.is_paying && !b.is_test);
-  const mrr = payingBiz.length * 99;
+  const mrr = payingBiz.length * 129;
   const totalRev = mrr; // simplification — extend with real payment history if available
 
   const conversionRate = visits > 0 ? ((registrations / visits) * 100).toFixed(1) : '0.0';
 
   // Update KPIs
-  document.getElementById('kpi-visits').textContent = visits.toLocaleString();
-  document.getElementById('kpi-cta').textContent = ctaClicks.toLocaleString();
+  document.getElementById('kpi-visits').textContent = hasTrackingData ? visits.toLocaleString() : '—';
+  document.getElementById('kpi-cta').textContent = hasTrackingData ? ctaClicks.toLocaleString() : '—';
   document.getElementById('kpi-signups').textContent = registrations.toLocaleString();
-  document.getElementById('kpi-conversion').textContent = conversionRate + '%';
+  document.getElementById('kpi-conversion').textContent = hasTrackingData ? conversionRate + '%' : '—';
   document.getElementById('kpi-active').textContent = activeBiz.length;
   document.getElementById('kpi-paying').textContent = payingBiz.length;
   document.getElementById('kpi-mrr').textContent = '₪' + mrr.toLocaleString();
@@ -941,7 +956,9 @@ async function loadMarketing() {
   ];
 
   const topCount = funnelSteps[0].count || 1;
-  document.getElementById('funnel-container').innerHTML = funnelSteps.map((step, i) => {
+  document.getElementById('funnel-container').innerHTML = !hasTrackingData
+    ? `<div style="text-align:center;padding:30px;color:var(--gray);">אין נתונים זמינים כרגע — מעקב כניסות/קליקים לא מחובר</div>`
+    : funnelSteps.map((step, i) => {
     const pct = topCount > 0 ? Math.round((step.count / topCount) * 100) : 0;
     const nextStep = funnelSteps[i + 1];
     const passRate = nextStep && step.count > 0 ? Math.round((nextStep.count / step.count) * 100) : null;
@@ -989,8 +1006,8 @@ async function loadMarketing() {
       <td style="font-size:12px;color:var(--gray);">💡 ${tips[i] || ''}</td>
     </tr>`;
   });
-  document.getElementById('dropoff-table').innerHTML = dropoffRows.join('') ||
-    `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray);">אין נתונים עדיין</td></tr>`;
+  document.getElementById('dropoff-table').innerHTML = (hasTrackingData && dropoffRows.join('')) ||
+    `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gray);">אין נתונים זמינים כרגע</td></tr>`;
 
   // Traffic sources
   const sourceMap = {};
@@ -1027,8 +1044,8 @@ async function loadMarketing() {
       </tr>`;
     });
 
-  document.getElementById('sources-table').innerHTML = sourceRows.join('') ||
-    `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--gray);">אין נתוני מקור עדיין</td></tr>`;
+  document.getElementById('sources-table').innerHTML = (hasTrackingData && sourceRows.join('')) ||
+    `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--gray);">אין נתונים זמינים כרגע — מעקב מקורות תנועה לא מחובר</td></tr>`;
 
   // New clients table
   const newClientsRows = bizInRange.slice(0, 50).map(b => {
@@ -1042,7 +1059,7 @@ async function loadMarketing() {
         ? `<span class="status-badge status-blocked">🚫 חסום</span>`
         : `<span class="status-badge status-trial">⏳ ניסיון</span>`;
     return `<tr>
-      <td><strong>${b.groom_name}</strong><br><span style="font-size:11px;color:var(--gray);">${b.phone || ''}</span></td>
+      <td><strong>${escapeHtml(bizName(b))}</strong><br><span style="font-size:11px;color:var(--gray);">${escapeHtml(b.phone || '')}</span></td>
       <td>${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</td>
       <td><span class="source-badge ${cls}">${emoji} ${src}</span></td>
       <td>${status}</td>
@@ -1234,7 +1251,7 @@ function printReport() {
     <table><thead><tr><th>שם העסק</th><th>תחום</th><th>תאריך הצטרפות</th><th>סכום</th></tr></thead><tbody>
     ${payingClients.map(biz => {
       const created = new Date(biz.created_at);
-      return `<tr><td>${biz.name}</td><td>${nicheLabels[biz.niche||'other']}</td><td>${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</td><td>₪129</td></tr>`;
+      return `<tr><td>${escapeHtml(bizName(biz))}</td><td>${nicheLabels[biz.niche||'other']}</td><td>${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</td><td>₪129</td></tr>`;
     }).join('')}
     <tr class="total"><td colspan="3">סה"כ הכנסות</td><td>₪${totalIncome}</td></tr>
     </tbody></table>
