@@ -896,28 +896,34 @@ function getSince() {
 async function loadMarketing() {
   const since = getSince();
 
-  // Fetch page_events
+  // Real funnel events are tracked by lvTrack() (index.html/app.html) into
+  // analytics_events — NOT into `contacts`, which is the wedding guest list and
+  // never has an event_type. That mismatch previously made this whole tab show
+  // fabricated zeros against a table it wasn't even the right one to query.
   const { data: events } = await db
-    .from('contacts')
+    .from('analytics_events')
     .select('*')
     .gte('created_at', since)
     .order('created_at', { ascending: true });
 
   mktEvents = events || [];
 
-  // The `contacts` table is the wedding guest list, not a funnel-events log — real rows never
-  // have `event_type`, so every count() below is honestly 0 against production data. Detect that
-  // and show a banner instead of presenting fabricated/zero funnel numbers as real performance.
+  // Still guard on real rows existing (e.g. a fresh niche/site with lvTrack not
+  // wired up yet) rather than presenting zero as if it were a real performance number.
   const hasTrackingData = mktEvents.some(e => e.event_type);
   const noDataBanner = document.getElementById('mkt-no-data-banner');
   if (noDataBanner) noDataBanner.style.display = hasTrackingData ? 'none' : 'block';
 
-  // Count event types
+  // Count event types — the primary names are exactly what lvTrack() sends today
+  // (index.html/app.html); the fallbacks keep this working for any other niche
+  // site that might log slightly different event names.
   const count = (type) => mktEvents.filter(e => e.event_type === type).length;
-  const visits       = count('landing_page_view') || count('visit');
-  const ctaClicks    = count('cta_clicked') || count('cta_click');
+  const visits       = count('page_view') || count('landing_page_view') || count('visit');
+  const ctaClicks    = count('cta_click') || count('cta_clicked');
   const sigStarted   = count('signup_started') || count('form_start');
   const sigCompleted = count('signup_completed');
+  const paymentInit  = count('payment_initiated');
+  const paymentDone  = count('payment_completed');
   const svcCreated   = count('service_created');
   const bookingPub   = count('booking_page_published');
   const firstBook    = count('first_booking_received');
@@ -943,7 +949,10 @@ async function loadMarketing() {
   document.getElementById('kpi-mrr').textContent = '₪' + mrr.toLocaleString();
   document.getElementById('kpi-total-rev').textContent = '₪' + totalRev.toLocaleString();
 
-  // Funnel steps
+  // Funnel steps. "פתחו את מסך התשלום" is real, tracked data (payment_initiated)
+  // — worth watching closely while checkout is manual/in-progress, since that's
+  // exactly the step where a couple currently has to wait on a human follow-up
+  // instead of completing payment on the spot.
   const funnelSteps = [
     { icon: '👁️', label: 'כניסות לאתר',            count: visits,       color: '#7c3aed' },
     { icon: '👆', label: 'לחצו על "התחל 30 יום חינם"', count: ctaClicks,   color: '#f59e0b' },
@@ -952,6 +961,7 @@ async function loadMarketing() {
     { icon: '🛠️', label: 'יצרו שירות ראשון',          count: svcCreated || Math.round(registrations * 0.6), color: '#0891b2' },
     { icon: '📅', label: 'פרסמו דף הזמנות',           count: bookingPub || Math.round(registrations * 0.4),  color: '#059669' },
     { icon: '🎉', label: 'קיבלו הזמנת תור ראשונה',    count: firstBook || Math.round(registrations * 0.3),   color: '#10b981' },
+    { icon: '💰', label: 'פתחו את מסך התשלום',        count: paymentInit,  color: '#eab308' },
     { icon: '💳', label: 'הפכו למוזמנים משלמים',       count: payingBiz.length, color: '#4f46e5' },
   ];
 
