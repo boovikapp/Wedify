@@ -75,7 +75,8 @@ textarea.form-input{resize:vertical;min-height:100px;}
 /* COOKIE BANNER */
 #cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:999;
   background:#171A21;border-top:1px solid rgba(200,169,126,0.2);
-  padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 #cookieBanner p{font-size:13px;color:rgba(248,250,252,0.7);flex:1;line-height:1.6;}
 #cookieBanner a{color:#C8A97E;}
 .btn-cookie{padding:9px 20px;border-radius:10px;font-family:'Heebo',sans-serif;
