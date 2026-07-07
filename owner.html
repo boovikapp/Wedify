@@ -606,6 +606,12 @@ async function toggleBlock(id, block) {
 
 async function togglePaying(id, paying) {
   await db.from('users').update({ is_paying: paying }).eq('id', id);
+  // Log the same event a real payment-gateway webhook would fire, so the funnel
+  // above closes the loop even while checkout is still manual — without this,
+  // "payment_initiated" has no matching completion event to measure against.
+  if (paying) {
+    try { await db.from('analytics_events').insert({ event_type: 'payment_completed', label: id, user_id: id }); } catch(e) {}
+  }
   loadDashboard();
 }
 
