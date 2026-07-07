@@ -663,7 +663,7 @@ function trackEvent(action,category,label){
       <div class="form-group" style="margin-bottom:0;"><label class="form-label">צד</label><select class="form-input" id="cSide"><option value="חתן">צד חתן</option><option value="כלה">צד כלה</option><option value="משותף">משותף</option></select></div>
     </div>
     <div style="height:14px;"></div>
-    <div class="form-group"><label class="form-label">קטגוריה</label><select class="form-input" id="cCat"><option>משפחה</option><option selected>חברים</option><option>עבודה</option><option>VIP</option><option>אחר</option></select></div>
+    <div class="form-group"><label class="form-label">קטגוריה</label><select class="form-input" id="cCat"><option>משפחה</option><option selected>חברים</option><option>צבא</option><option>שכנים</option><option>עבודה</option><option>VIP</option><option>אחר</option></select></div>
     <div class="form-group">
       <label class="form-label">סימונים</label>
       <div style="display:flex;gap:14px;flex-wrap:wrap;">
@@ -1967,6 +1967,33 @@ function getCatColor(cat) {
   return found?.color||'';
 }
 
+// Maps a hall-map table's category tag to the same {category, side} vocabulary used
+// on contacts (cCat/cSide), so runSmartSeating() can prefer a tagged table for the
+// matching guest group. 'משותף' and '' (no tag) intentionally have no entry — they
+// stay open/neutral tables with no group preference.
+const TABLE_CAT_MATCH = {
+  'משפחה כלה': {cat:'משפחה', side:'כלה'},
+  'משפחה חתן': {cat:'משפחה', side:'חתן'},
+  'חברים כלה': {cat:'חברים', side:'כלה'},
+  'חברים חתן': {cat:'חברים', side:'חתן'},
+  'צבא כלה':   {cat:'צבא',   side:'כלה'},
+  'צבא חתן':   {cat:'צבא',   side:'חתן'},
+  'שכנים':     {cat:'שכנים'},
+  'עבודה':     {cat:'עבודה'},
+  'VIP':       {vip:true},
+};
+// Table numbers currently tagged to match a given guest group ({cat, side, vip}).
+function tablesMatchingGroup(group){
+  return mapEls.filter(e=>e.type==='table' && e.category).filter(e=>{
+    const m = TABLE_CAT_MATCH[e.category];
+    if(!m) return false;
+    if(group.vip || m.vip) return !!group.vip === !!m.vip;
+    if(m.cat!==group.cat) return false;
+    if(m.side && group.side && m.side!==group.side) return false;
+    return true;
+  }).map(e=>e.num);
+}
+
 function selMap(id){
   const prevSel = mapSel;
   mapSel=id;
@@ -1987,7 +2014,8 @@ function selMap(id){
           <span class="badge badge-${(el.guests||[]).length>=(el.seats||10)?'red':(el.guests||[]).length>0?'green':'gray'}">${(el.guests||[]).length}/${el.seats||10}</span>
         </div>
         <div style="font-size:12px;color:var(--gray);margin-bottom:12px;">${names||'שולחן ריק'}</div>
-        <div style="font-size:11px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">קטגוריה</div>
+        <div style="font-size:11px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">קטגוריה</div>
+        <div style="font-size:11.5px;color:var(--gray2);margin-bottom:8px;">"הושבה חכמה" תעדיף להושיב כאן אורחים מהקטגוריה שתבחרו</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
           ${TABLE_CATS.map(cat=>`
             <button onclick="setTableCat('${id}','${cat.key}')"
@@ -2600,6 +2628,11 @@ async function sendReminderAll(){
 
 // ── SMART SEATING ─────────────────────────────────────────
 async function runSmartSeating(){
+  // Table category tags live only in mapEls, which is normally populated by visiting
+  // the seating page or dashboard first. Load it here too, so smart seating honors
+  // table tags even when triggered from the guests/tables page directly.
+  if(!mapEls.length){ const saved = loadMapLayout(); if(saved) mapEls = saved; }
+
   // Get contact info for category/side (also used to exclude manual-seating tagged contacts)
   const getContact = (g) => contacts.find(c=>c.id===g.contact_id);
   const unseat = guests.filter(g=>g.status==='confirmed'&&!g.table_number&&!(getContact(g)?.tags||[]).includes('הושבה ידנית'));
@@ -2615,7 +2648,8 @@ async function runSmartSeating(){
     if(occ[g.table_number]!==undefined) occ[g.table_number]+=(g.companions||0)+1;
   });
 
-  // Group guests by category+side for smart grouping
+  // Group guests by category+side for smart grouping. Each group keeps its own
+  // {cat, side, vip} so it can be matched against hall-map table tags below.
   const groups = {};
   unseat.forEach(g=>{
     const c = getContact(g);
@@ -2623,44 +2657,60 @@ async function runSmartSeating(){
     const side = c?.side||'משותף';
     const isVip = (c?.tags||[]).includes('VIP') || cat==='VIP';
     const key = isVip ? '__VIP__' : `${cat}__${side}`;
-    if(!groups[key]) groups[key]=[];
-    groups[key].push(g);
+    if(!groups[key]) groups[key]={cat, side, vip:isVip, guests:[]};
+    groups[key].guests.push(g);
   });
 
   // Priority order: VIP first, then family by side, then friends, then work
   const priority = ['__VIP__'];
   ['משפחה__כלה','משפחה__חתן','משפחה__משותף',
    'חברים__כלה','חברים__חתן','חברים__משותף',
+   'צבא__כלה','צבא__חתן',
+   'שכנים__משותף','שכנים__כלה','שכנים__חתן',
    'עבודה__כלה','עבודה__חתן','עבודה__משותף',
   ].forEach(k=>{ if(groups[k]) priority.push(k); });
   // Add any remaining groups
   Object.keys(groups).forEach(k=>{ if(!priority.includes(k)) priority.push(k); });
 
-  // Find next table with enough space, prefer to fill tables by group
-  function findTable(sz, preferTable=null) {
-    // First try preferred table
-    if(preferTable && (spt-(occ[preferTable]||0))>=sz) return preferTable;
-    // Find table with most space that can fit
-    let best=null, bestSpace=0;
-    for(let t=1;t<=tbl;t++){
+  // Find a table for this group, in three tiers: (1) the table we're already
+  // filling for this same group, (2) a table the couple tagged for this exact
+  // group on the hall map, (3) any neutral/untagged table. A table reserved for
+  // a *different* group is only used as an absolute last resort, so nobody is
+  // ever left unseated just because the map's tagging is incomplete.
+  function bestInList(list, sz){
+    let best=null, bestSpace=-1;
+    for(const t of list){
       const space=spt-(occ[t]||0);
       if(space>=sz && space>bestSpace){bestSpace=space;best=t;}
     }
     return best;
+  }
+  function findTable(sz, preferTable, matchTables) {
+    if(preferTable && (spt-(occ[preferTable]||0))>=sz) return preferTable;
+    if(matchTables.length){ const t=bestInList(matchTables,sz); if(t) return t; }
+    const reservedForOther = mapEls
+      .filter(e=>e.type==='table' && e.category && TABLE_CAT_MATCH[e.category] && !matchTables.includes(e.num))
+      .map(e=>e.num);
+    const neutral = []; for(let t=1;t<=tbl;t++) if(!reservedForOther.includes(t)) neutral.push(t);
+    const viaNeutral = bestInList(neutral, sz);
+    if(viaNeutral) return viaNeutral;
+    const all = []; for(let t=1;t<=tbl;t++) all.push(t);
+    return bestInList(all, sz);
   }
 
   let assigned=0;
   let curTable=null;
 
   for(const key of priority){
-    const grp = groups[key]||[];
-    if(!grp.length) continue;
-    
+    const grpObj = groups[key];
+    if(!grpObj || !grpObj.guests.length) continue;
+    const matchTables = tablesMatchingGroup(grpObj);
+
     // Try to seat this group together
-    for(const g of grp){
+    for(const g of grpObj.guests){
       const sz=(g.companions||0)+1;
       // Try current table first, then find new one
-      const t = findTable(sz, curTable);
+      const t = findTable(sz, curTable, matchTables);
       if(t){
         await sb.from('guests').update({table_number:t}).eq('id',g.id);
         g.table_number=t;
@@ -2759,9 +2809,9 @@ const HELP_BANNERS = {
   contacts: { icon:'👥', title:'ספר הטלפונים',
     text:'הוסיפו מוזמנים ידנית או ייבאו מאנשי קשר. אחרי ההוספה שלחו הזמנות WhatsApp לכולם בלחיצה אחת.', key:'help_contacts' },
   seating: { icon:'🪑', title:'מפת האולם',
-    text:'הוסיפו שולחנות ואלמנטים (במה, רחבה, כניסה). ניתן לסמן קטגוריה לשולחן לצורך תיוג ויזואלי בלבד — "הושבה חכמה" משבצת את המאושרים לפי הקטגוריה והצד שהוגדרו לכל איש קשר בספר הטלפונים, לא לפי תיוג השולחן.', key:'help_seating' },
+    text:'הוסיפו שולחנות ואלמנטים (במה, רחבה, כניסה). סמנו קטגוריה לשולחן כדי לשריין אותו לקבוצה מסוימת — "הושבה חכמה" תעדיף להושיב שם את מי שמתויג לאותה קטגוריה בספר הטלפונים, ותשתמש בשולחנות ללא תיוג לכל השאר.', key:'help_seating' },
   tables: { icon:'🍽️', title:'ניהול שולחנות',
-    text:'"הושבה חכמה" משבצת את כל מי שאישר הגעה לפי הקטגוריה והצד שהוגדרו לכל איש קשר בספר הטלפונים: VIP ראשון, ואז משפחה, חברים, עבודה. תיוג הקטגוריה על השולחן עצמו במפת האולם הוא ויזואלי בלבד ואינו משפיע על השיבוץ.', key:'help_tables' },
+    text:'"הושבה חכמה" משבצת את כל מי שאישר הגעה: VIP ראשון, ואז משפחה, חברים, צבא, שכנים ועבודה — לפי הקטגוריה והצד שהוגדרו לכל איש קשר. אם תייגתם שולחן במפת האולם בקטגוריה מתאימה, האלגוריתם יעדיף להושיב שם את הקבוצה הזו קודם.', key:'help_tables' },
   tasks: { icon:'✅', title:'רשימת משימות',
     text:'עקבו אחר כל המשימות לחתונה. לחצו על משימה לסימון. הוסיפו משימות חדשות בכפתור למעלה.', key:'help_tasks' },
 };
