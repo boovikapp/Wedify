@@ -193,6 +193,7 @@ body{font-family:'Heebo',sans-serif;background:#0A0C0F;color:#F8FAFC;
     <div style="font-size:14px;font-weight:600;color:#F8FAFC;margin-bottom:10px;">מספר מגיעים בפועל:</div>
     <div class="companions-grid" id="compGrid"></div>
     <button class="btn-gold" style="width:100%;" onclick="confirmArrival()">✓ אשר הגעה</button>
+    <button class="btn-ghost" style="width:100%;margin-top:8px;" onclick="declineArrival()">✗ סמן כלא מגיע/ה</button>
     <button class="btn-ghost" style="width:100%;margin-top:8px;" onclick="closeModal()">סגור</button>
   </div>
 </div>
@@ -202,6 +203,8 @@ body{font-family:'Heebo',sans-serif;background:#0A0C0F;color:#F8FAFC;
 const SB_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
 const sb = supabase.createClient(SB_URL, SB_KEY);
+
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 let me=null, eventData=null, contacts=[], guests=[], curTab='all', selContact=null;
 let authToken=null;
@@ -257,9 +260,12 @@ async function loadApp(userId) {
 
 // ── STATS ──
 function updateStats() {
-  const conf = guests.filter(g=>g.status==='confirmed').length;
+  // "הגיעו" (arrived) must reflect actual door check-in (contacts.checked_in, the same
+  // field scan.html writes), not guests.status — that field means "RSVP'd yes" and is a
+  // separate concept (see confirmArrival()).
+  const arrived = contacts.filter(c=>c.checked_in).length;
   const pend = contacts.filter(c=>!guests.find(g=>g.contact_id===c.id)).length;
-  document.getElementById('statConfirmed').textContent = conf;
+  document.getElementById('statConfirmed').textContent = arrived;
   document.getElementById('statPending').textContent = pend;
 }
 
@@ -304,18 +310,22 @@ function renderList() {
   }
 
   list.innerHTML = items.map(c => {
-    const initials = (c.first_name[0]||'')+(c.last_name?.[0]||'');
-    const badge = c.status==='confirmed'
+    const initials = escapeHtml((c.first_name[0]||'')+(c.last_name?.[0]||''));
+    // "Arrived" (green check) reflects actual door check-in (c.checked_in, written by
+    // confirmArrival()/scan.html), separate from c.status which is the pre-event RSVP answer.
+    const badge = c.checked_in
       ? `<span class="badge badge-green">✓ הגיע</span>`
+      : c.status==='confirmed'
+      ? `<span class="badge badge-amber">אישר/ה, טרם הגיע/ה</span>`
       : c.status==='declined'
       ? `<span class="badge badge-gray">לא מגיע</span>`
       : `<span class="badge badge-amber">ממתין</span>`;
-    const tbl = c.table_number ? `<div class="tbl-chip">שולחן ${c.table_number}</div>` : '';
-    return `<div class="guest-row ${c.status==='confirmed'?'arrived':''}" onclick="openGuest('${c.id}')">
-      <div class="av ${c.status==='confirmed'?'confirmed':''}">${initials}</div>
+    const tbl = c.table_number ? `<div class="tbl-chip">שולחן ${escapeHtml(c.table_number)}</div>` : '';
+    return `<div class="guest-row ${c.checked_in?'arrived':''}" onclick="openGuest('${c.id}')">
+      <div class="av ${c.checked_in?'confirmed':''}">${initials}</div>
       <div class="guest-info">
-        <div class="guest-name">${c.first_name} ${c.last_name||''}</div>
-        <div class="guest-meta">${c.category||''} · ${c.guests_count||1} מוזמנים</div>
+        <div class="guest-name">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name||'')}</div>
+        <div class="guest-meta">${escapeHtml(c.category||'')} · ${c.guests_count||1} מוזמנים</div>
       </div>
       <div class="guest-right">${badge}${tbl}</div>
     </div>`;
@@ -355,12 +365,24 @@ async function confirmArrival() {
   if(!selContact) return;
   const selBtn = document.querySelector('.comp-btn.sel');
   const companions = selBtn ? parseInt(selBtn.textContent)-1 : 0;
-  
+
+  // Actual door arrival is tracked on contacts.checked_in / checked_in_at — the SAME fields
+  // scan.html uses — so both tools agree on who has physically arrived. We deliberately do
+  // NOT write guests.status here: that field means "RSVP'd yes before the event" (set via
+  // book.html) and must not be overwritten by a door check-in action.
+  const nowIso = new Date().toISOString();
+  await sb.from('contacts').update({checked_in:true, checked_in_at:nowIso}).eq('id',selContact.id);
+  selContact.checked_in = true; selContact.checked_in_at = nowIso;
+  const cRef = contacts.find(c=>c.id===selContact.id);
+  if(cRef){ cRef.checked_in = true; cRef.checked_in_at = nowIso; }
+
   const existing = guests.find(g=>g.contact_id===selContact.id);
   if(existing) {
-    await sb.from('guests').update({status:'confirmed',companions}).eq('id',existing.id);
-    existing.status='confirmed'; existing.companions=companions;
+    // Only the actual-companions headcount is updated here; the RSVP status is left untouched.
+    await sb.from('guests').update({companions}).eq('id',existing.id);
+    existing.companions=companions;
   } else {
+    // No prior RSVP record (walk-in) — create one so companions/table-count logic still works.
     const {data} = await sb.from('guests').insert({
       event_id: eventData.id,
       contact_id: selContact.id,
@@ -368,6 +390,28 @@ async function confirmArrival() {
       last_name: selContact.last_name||'',
       phone: selContact.phone,
       status:'confirmed', companions
+    }).select().single();
+    if(data) guests.push(data);
+  }
+  closeModal();
+  updateStats();
+  renderList();
+}
+
+async function declineArrival() {
+  if(!selContact) return;
+  const existing = guests.find(g=>g.contact_id===selContact.id);
+  if(existing) {
+    await sb.from('guests').update({status:'declined'}).eq('id',existing.id);
+    existing.status='declined';
+  } else {
+    const {data} = await sb.from('guests').insert({
+      event_id: eventData.id,
+      contact_id: selContact.id,
+      first_name: selContact.first_name,
+      last_name: selContact.last_name||'',
+      phone: selContact.phone,
+      status:'declined', companions:0
     }).select().single();
     if(data) guests.push(data);
   }

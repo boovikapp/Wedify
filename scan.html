@@ -150,6 +150,8 @@ const SB_URL = 'https://yzjhwnqqusqjctnqktqv.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6amh3bnFxdXNxamN0bnFrdHF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwOTMxNzcsImV4cCI6MjA5NzY2OTE3N30.uaNM3-yAVuGrIbHqSsQhs1uZGKr4yM2d2MLedLklHNA';
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 let me=null, eventData=null, html5QrCode=null;
 
 // ── LOGIN ──
@@ -206,10 +208,10 @@ async function refreshStats() {
   if(checkedIn?.length) {
     list.innerHTML = checkedIn.map(c => {
       const time = c.checked_in_at ? new Date(c.checked_in_at).toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}) : '';
-      const initials = (c.first_name?.[0]||'')+(c.last_name?.[0]||'');
+      const initials = escapeHtml((c.first_name?.[0]||'')+(c.last_name?.[0]||''));
       return `<div class="recent-item">
         <div class="recent-av">${initials}</div>
-        <div class="recent-name">${c.first_name} ${c.last_name||''}</div>
+        <div class="recent-name">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name||'')}</div>
         <div class="recent-time">${time}</div>
       </div>`;
     }).join('');
