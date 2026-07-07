@@ -6,7 +6,7 @@
 <title>Loviva — ניהול האירוע</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0F1115">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Loviva">
@@ -1723,18 +1723,19 @@ function pgPending() {
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${pend.map(c=>`
           <div class="contact-card">
-            <div class="avatar">${(c.first_name[0]||'')+(c.last_name[0]||'')}</div>
+            <div class="avatar">${escapeHtml((c.first_name[0]||'')+(c.last_name[0]||''))}</div>
             <div style="flex:1;min-width:0;">
-              <div style="font-weight:700;font-size:14px;color:var(--white);margin-bottom:3px;">${c.first_name} ${c.last_name}</div>
-              <div style="font-size:12px;color:var(--gray);direction:ltr;">${c.phone||''}</div>
+              <div style="font-weight:700;font-size:14px;color:var(--white);margin-bottom:3px;">${escapeHtml(c.first_name)} ${escapeHtml(c.last_name)}</div>
+              <div style="font-size:12px;color:var(--gray);direction:ltr;">${escapeHtml(c.phone||'')}</div>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button onclick="sendReminder('${c.id}','${c.phone}','${c.first_name}')" class="btn btn-ghost btn-xs">תזכורת</button>
-              <button onclick="openWA('${c.phone}')" class="wa-btn" style="padding:6px 12px;font-size:12px;">WA</button>
+              <button data-send-reminder-id="${escapeHtml(c.id)}" class="btn btn-ghost btn-xs">תזכורת</button>
+              <button data-open-wa-id="${escapeHtml(c.id)}" class="wa-btn" style="padding:6px 12px;font-size:12px;">WA</button>
             </div>
           </div>`).join('')}
       </div>`}
     </div>`;
+  bindContactCardActions();
 }
 
 // ── TABLES PAGE ───────────────────────────────────────────
@@ -1776,8 +1777,8 @@ function pgTables() {
             <div class="prog-track" style="margin-bottom:12px;"><div class="prog-fill" style="width:${Math.min(100,pct*100)}%;background:${color};"></div></div>
             <div style="display:flex;flex-direction:column;gap:5px;">
               ${gs.map(g=>`<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);">
-                <div class="avatar avatar-sm">${(g.first_name[0]||'')+(g.last_name[0]||'')}</div>
-                <span style="flex:1;">${g.first_name} ${g.last_name}</span>
+                <div class="avatar avatar-sm">${escapeHtml((g.first_name[0]||'')+(g.last_name[0]||''))}</div>
+                <span style="flex:1;">${escapeHtml(g.first_name)} ${escapeHtml(g.last_name)}</span>
                 ${g.companions>0?`<span style="font-size:11px;color:var(--gray);">+${g.companions}</span>`:''}
                 <button onclick="removeTable('${g.id}')" style="border:none;background:none;cursor:pointer;color:var(--gray);padding:2px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
               </div>`).join('')}
@@ -1927,7 +1928,7 @@ function selMap(id){
   if(el&&info){
     info.style.display='block';
     if(el.type==='table'){
-      const names=(el.guests||[]).map(g=>`${g.first_name} ${g.last_name}${g.companions>0?' (+'+g.companions+')':''}`).join(', ')||'ריק';
+      const names=(el.guests||[]).map(g=>`${escapeHtml(g.first_name)} ${escapeHtml(g.last_name)}${g.companions>0?' (+'+g.companions+')':''}`).join(', ')||'ריק';
       const currentCat = el.category||'';
       info.innerHTML=`
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2109,6 +2110,12 @@ function pgReports() {
     </div>`;
 }
 
+function csvField(v) {
+  let s = String(v??'');
+  if (/^[=+\-@]/.test(s)) s = "'"+s; // prevent Excel/Sheets formula injection
+  if (/[",\n\r]/.test(s)) s = '"'+s.replace(/"/g,'""')+'"'; // quote+escape per CSV spec
+  return s;
+}
 function exportCSV(type) {
   let rows=[],hd=[];
   if(type==='contacts'){hd=['שם פרטי','שם משפחה','טלפון','קטגוריה','צד','כמות','נשלח'];rows=contacts.map(c=>[c.first_name,c.last_name,c.phone,c.category,c.side,c.guests_count,c.invite_sent?'כן':'לא']);}
@@ -2226,8 +2233,8 @@ function renderVcfPreview() {
       border-radius:10px;border:1px solid var(--border2);cursor:pointer;">
       <input type="checkbox" ${c.selected?'checked':''} onchange="_vcfParsed[${i}].selected=this.checked"
         style="accent-color:var(--gold);flex-shrink:0;">
-      <span style="font-size:13px;color:var(--white);flex:1;">${c.name}</span>
-      <span style="font-size:12px;color:var(--gray);direction:ltr;">${c.phone}</span>
+      <span style="font-size:13px;color:var(--white);flex:1;">${escapeHtml(c.name)}</span>
+      <span style="font-size:12px;color:var(--gray);direction:ltr;">${escapeHtml(c.phone)}</span>
     </label>`).join('');
 }
 

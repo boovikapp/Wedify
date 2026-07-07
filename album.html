@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0F1115">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Loviva">
@@ -239,61 +239,132 @@ let selectedFiles = [];
 const MAX_FILES = 3;
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
 const NOTIFY_AT = 30; // notify couple when 30 photos
+const LOAD_TIMEOUT_MS = 10000;
 
-window.onload = async () => {
+// Escape any DB/user-sourced text before inserting into innerHTML templates.
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+window.onload = () => { loadAlbum(); };
+
+async function loadAlbum() {
+  // Restore the loading spinner in case this is a retry after a previous error.
+  document.getElementById('loadingState').innerHTML =
+    '<div class="spinner"></div><div style="font-size:14px;color:rgba(248,250,252,0.4);">טוען את האלבום...</div>';
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('mainApp').style.display = 'none';
+
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   const eid   = params.get('event');
 
   if (!token && !eid) { showError('קישור לא תקין'); return; }
 
-  // Load event via token or event id
-  let ev = null, user = null;
-  if (eid) {
-    const r = await sb.from('events').select('*').eq('id', eid).single();
-    ev = r.data;
-  } else {
-    // Find event via contact token
-    const r = await sb.from('contacts').select('event_id').eq('rsvp_token', token).single();
-    if (r.data) {
-      const r2 = await sb.from('events').select('*').eq('id', r.data.event_id).single();
-      ev = r2.data;
+  const timeout = setTimeout(() => {
+    showLoadError('הטעינה לוקחת זמן', 'בדקו את החיבור לאינטרנט ונסו שוב');
+  }, LOAD_TIMEOUT_MS);
+
+  try {
+    // Load event via token or event id
+    let ev = null, user = null;
+    if (eid) {
+      const r = await sb.from('events').select('*').eq('id', eid).single();
+      ev = r.data;
+    } else {
+      // Find event via contact token
+      const r = await sb.from('contacts').select('event_id').eq('rsvp_token', token).single();
+      if (r.data) {
+        const r2 = await sb.from('events').select('*').eq('id', r.data.event_id).single();
+        ev = r2.data;
+      }
     }
+
+    if (!ev) { clearTimeout(timeout); showError('האירוע לא נמצא'); return; }
+    eventId = ev.id;
+    eventData = ev;
+
+    const r3 = await sb.from('users').select('bride_name, groom_name, phone').eq('id', ev.user_id).single();
+    user = r3.data;
+    userData = user;
+
+    clearTimeout(timeout);
+
+    // Update UI
+    const names = (user?.bride_name||'') + ' ו' + (user?.groom_name||'');
+    document.getElementById('coupleNames').innerHTML =
+      `<em>${escapeHtml(user?.bride_name||'')}</em> ו${escapeHtml(user?.groom_name||'')}`;
+    document.getElementById('heroSub').textContent =
+      'תשתפו עם ' + names + ' את הרגעים המיוחדים מהחתונה 💕';
+
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    await loadGallery();
+  } catch (e) {
+    clearTimeout(timeout);
+    console.error('loadAlbum failed:', e);
+    showLoadError('שגיאה בטעינה', 'משהו השתבש בטעינת האלבום. בדקו את החיבור ונסו שוב');
   }
-
-  if (!ev) { showError('האירוע לא נמצא'); return; }
-  eventId = ev.id;
-  eventData = ev;
-
-  const r3 = await sb.from('users').select('*').eq('id', ev.user_id).single();
-  user = r3.data;
-  userData = user;
-
-  // Update UI
-  const names = (user?.bride_name||'') + ' ו' + (user?.groom_name||'');
-  document.getElementById('coupleNames').innerHTML = 
-    `<em>${user?.bride_name||''}</em> ו${user?.groom_name||''}`;
-  document.getElementById('heroSub').textContent = 
-    'תשתפו עם ' + names + ' את הרגעים המיוחדים מהחתונה 💕';
-
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('mainApp').style.display = 'block';
-
-  await loadGallery();
-};
+}
 
 function showError(msg) {
-  document.getElementById('loadingState').innerHTML = 
+  document.getElementById('loadingState').innerHTML =
     '<div style="font-size:40px;margin-bottom:12px;">💔</div>' +
-    '<div style="font-size:16px;color:#F8FAFC;margin-bottom:6px;">' + msg + '</div>' +
+    '<div style="font-size:16px;color:#F8FAFC;margin-bottom:6px;">' + escapeHtml(msg) + '</div>' +
     '<div style="font-size:13px;color:rgba(248,250,252,0.4);">פנו לחתן/ה לקישור חדש</div>';
 }
 
+function showLoadError(title, sub) {
+  document.getElementById('loadingState').innerHTML =
+    '<div style="padding:32px 20px;text-align:center;">' +
+    '<div style="font-size:40px;margin-bottom:12px;">⏱️</div>' +
+    '<div style="font-size:15px;font-weight:700;color:#F8FAFC;margin-bottom:6px;">' + escapeHtml(title) + '</div>' +
+    '<div style="font-size:13px;color:rgba(248,250,252,0.5);">' + escapeHtml(sub) + '</div><br>' +
+    '<button onclick="loadAlbum()" style="background:#C8A97E;color:#111;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">נסו שוב</button>' +
+    '</div>';
+}
+
 // ── FILE HANDLING ──
-function handleFiles(files) {
+// Client-side only: verifies the file actually decodes as an image/video rather
+// than trusting the (spoofable) File.type / filename extension. Real content-type
+// enforcement still needs a server/storage-policy check, which is out of scope here.
+const IMAGE_EXT_BY_TYPE = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'};
+const ALLOWED_VIDEO_EXT = ['mp4','mov','webm'];
+
+function validateImageFile(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(true); };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
+    img.src = url;
+  });
+}
+
+function validateVideoFile(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(true); };
+    video.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
+    video.src = url;
+  });
+}
+
+function safeExt(f) {
+  if (f.type.startsWith('image/')) return IMAGE_EXT_BY_TYPE[f.type] || 'jpg';
+  if (f.type.startsWith('video/')) {
+    const nameExt = (f.name.split('.').pop()||'').toLowerCase();
+    return ALLOWED_VIDEO_EXT.includes(nameExt) ? nameExt : 'mp4';
+  }
+  return 'bin';
+}
+
+async function handleFiles(files) {
   const err = document.getElementById('uploadErr');
   err.style.display = 'none';
-  
+
   const arr = Array.from(files);
   const videos = arr.filter(f => f.type.startsWith('video/'));
   const images = arr.filter(f => f.type.startsWith('image/'));
@@ -304,6 +375,16 @@ function handleFiles(files) {
 
   for (const f of arr) {
     if (f.size > MAX_SIZE) { showErr(err, f.name + ' גדול מדי (מקסימום 20MB)'); return; }
+  }
+
+  // Verify the files actually load as image/video content, not just spoofed MIME types.
+  for (const f of images) {
+    const ok = await validateImageFile(f);
+    if (!ok) { showErr(err, f.name + ' אינו קובץ תמונה תקין'); return; }
+  }
+  for (const f of videos) {
+    const ok = await validateVideoFile(f);
+    if (!ok) { showErr(err, f.name + ' אינו קובץ וידאו תקין'); return; }
   }
 
   selectedFiles = arr;
@@ -359,7 +440,7 @@ async function submitAlbum() {
     
     for (let i=0; i<selectedFiles.length; i++) {
       const f = selectedFiles[i];
-      const ext = f.name.split('.').pop();
+      const ext = safeExt(f);
       const path = `albums/${eventId}/${Date.now()}_${i}.${ext}`;
       
       progressLabel.textContent = `מעלה ${i+1} מתוך ${selectedFiles.length}...`;
@@ -423,34 +504,52 @@ async function checkAndNotify() {
   if (totalPhotos >= NOTIFY_AT) {
     const { data:ev } = await sb.from('events').select('album_notified').eq('id',eventId).single();
     if (!ev?.album_notified && userData?.phone) {
+      // Atomically claim the notification: only succeeds if album_notified is still
+      // false at write time. If another concurrent request already flipped it, the
+      // update matches zero rows and we skip sending a duplicate notification.
+      const { data:claimed, error:claimErr } = await sb.from('events')
+        .update({album_notified:true})
+        .eq('id', eventId)
+        .eq('album_notified', false)
+        .select();
+
+      if (claimErr || !claimed || !claimed.length) return;
+
       const phone = userData.phone.replace(/\D/g,'').replace(/^0/,'972');
       const albumUrl = window.location.origin + '/album.html?event=' + eventId;
       const msg = `💍 ${userData.bride_name} ו${userData.groom_name}\n\n` +
         `🎉 האלבום השיתופי שלכם צבר ${totalPhotos} תמונות!\n\n` +
         `המוזמנים שלכם שיתפו רגעים מיוחדים מהחתונה.\n` +
         `לצפייה באלבום:\n${albumUrl}`;
-      
+
       await fetch(`${WAPI}/messages/text`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+LOVIVA_TOKEN},
         body:JSON.stringify({to: phone+'@s.whatsapp.net', body:msg})
       });
-
-      await sb.from('events').update({album_notified:true}).eq('id',eventId);
     }
   }
 }
 
 // ── GALLERY ──
 async function loadGallery() {
-  const { data:entries } = await sb.from('album_entries')
+  const { data:entries, error } = await sb.from('album_entries')
     .select('*').eq('event_id',eventId)
     .order('created_at',{ascending:false});
+
+  const grid = document.getElementById('galleryGrid');
+
+  if (error) {
+    console.error('loadGallery failed:', error);
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px 12px;color:rgba(248,250,252,0.5);font-size:13px;">' +
+      'לא הצלחנו לטעון את התמונות מהאלבום.<br>' +
+      '<button onclick="loadGallery()" style="margin-top:8px;background:none;border:1px solid rgba(200,169,126,0.4);color:#C8A97E;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;padding:6px 14px;border-radius:8px;">נסו שוב</button></div>';
+    return;
+  }
 
   if (!entries?.length) return;
 
   let totalPhotos=0, totalBlessing=0, contributors=new Set();
-  const grid = document.getElementById('galleryGrid');
   grid.innerHTML='';
 
   entries.forEach(e => {
@@ -460,13 +559,14 @@ async function loadGallery() {
 
     (e.photo_urls||[]).forEach(url => {
       const isVideo = url.match(/\.(mp4|mov|webm)/i);
+      const safeUrl = escapeHtml(url);
       const div = document.createElement('div');
       div.className='gallery-item';
       div.innerHTML = isVideo
-        ? `<video src="${url}" playsinline muted loop></video>`
-        : `<img src="${url}" loading="lazy" alt="">`;
+        ? `<video src="${safeUrl}" playsinline muted loop></video>`
+        : `<img src="${safeUrl}" loading="lazy" alt="">`;
       if (e.contributor_name || e.blessing) {
-        div.innerHTML += `<div class="gallery-overlay"><div class="gallery-name">${e.contributor_name||''}</div></div>`;
+        div.innerHTML += `<div class="gallery-overlay"><div class="gallery-name">${escapeHtml(e.contributor_name||'')}</div></div>`;
         if (e.blessing) div.innerHTML += `<div class="gallery-blessing">💬</div>`;
       }
       grid.appendChild(div);

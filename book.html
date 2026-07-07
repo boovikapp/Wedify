@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0F1115">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Loviva">
@@ -293,6 +293,7 @@ var contact_ = null, event_ = null, user_ = null;
 var choice_ = null, count_ = 1;
 var answers_ = {};
 var isDemo_ = false;
+var isSubmitting_ = false; // guards against double-click/double-tap re-entrant submits
 
 // ── INIT ─────────────────────────────────────────────────
 function showDemo() {
@@ -346,7 +347,7 @@ async function loadData(token) {
     event_ = r2.data;
 
     if (event_) {
-      var r3 = await db.from('users').select('*').eq('id', event_.user_id).single();
+      var r3 = await db.from('users').select('bride_name, groom_name').eq('id', event_.user_id).single();
       user_ = r3.data;
     }
 
