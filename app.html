@@ -798,6 +798,27 @@ let curPage = 'dashboard';
 let mapEls = [], mapDrag = null, mapSel = null, mapInited = false;
 let dOffX = 0, dOffY = 0;
 
+// ── HALL MAP LAYOUT PERSISTENCE ──────────────────────────
+// Saved to this browser's localStorage (keyed by event id), so table positions/
+// categories/added elements survive a page reload. Not synced across devices —
+// syncing across devices would need a dedicated column on the events table.
+function mapLayoutKey(){ return ev?.id ? 'loviva_map_'+ev.id : null; }
+function loadMapLayout(){
+  const key = mapLayoutKey(); if(!key) return null;
+  try{ const saved = JSON.parse(localStorage.getItem(key)||'null'); return Array.isArray(saved)&&saved.length?saved:null; }
+  catch(e){ return null; }
+}
+function saveMapLayout(){
+  const key = mapLayoutKey();
+  if(!key){ toast('שגיאה בשמירה','error'); return; }
+  // Strip `guests`, a derived field recomputed on every render from the guest list —
+  // saving it would just store stale snapshots that get overwritten anyway.
+  const serializable = mapEls.map(({guests, ...rest})=>rest);
+  localStorage.setItem(key, JSON.stringify(serializable));
+  renderDashMap();
+  toast('השינויים נשמרו ✓','success');
+}
+
 // ── LOGO ─────────────────────────────────────────────────
 const LOGO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgMTIwIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjEyMCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImxvZ28tZ29sZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNFN0Q3QzEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNDOEE5N0UiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojOUE3QTUyIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJsb2dvLWdvbGQyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I0RGQzI4RSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNCODkwNUMiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIAogIDwhLS0gUmluZyAxIC0tPgogIDxjaXJjbGUgY3g9IjQ0IiBjeT0iNjAiIHI9IjIyIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjbG9nby1nb2xkKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgPCEtLSBSaW5nIDIgb3ZlcmxhcHBpbmcgLS0+CiAgPGNpcmNsZSBjeD0iNjQiIGN5PSI2MCIgcj0iMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNsb2dvLWdvbGQyKSIgc3Ryb2tlLXdpZHRoPSI1Ii8+CiAgCiAgPCEtLSBEaWFtb25kIG9uIHRvcCAtLT4KICA8cG9seWdvbiBwb2ludHM9IjU0LDIyIDYwLDMwIDU0LDM4IDQ4LDMwIiBmaWxsPSJ1cmwoI2xvZ28tZ29sZCkiIG9wYWNpdHk9IjAuOSIvPgogIAogIDwhLS0gTG92aXZhIHRleHQgLS0+CiAgPHRleHQgeD0iMTAwIiB5PSI3NSIgCiAgICBmb250LWZhbWlseT0iR2VvcmdpYSwgJ1RpbWVzIE5ldyBSb21hbicsIHNlcmlmIiAKICAgIGZvbnQtc2l6ZT0iNTIiIAogICAgZm9udC13ZWlnaHQ9IjQwMCIKICAgIGZvbnQtc3R5bGU9Iml0YWxpYyIKICAgIGZpbGw9IiNDOEE5N0UiCiAgICBsZXR0ZXItc3BhY2luZz0iLTEiPkxvdml2YTwvdGV4dD4KICAgIAogIDwhLS0gVGFnbGluZSAtLT4KICA8dGV4dCB4PSIxMDEiIHk9Ijk1IgogICAgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIgogICAgZm9udC1zaXplPSIxMSIKICAgIGZvbnQtd2VpZ2h0PSI0MDAiCiAgICBmaWxsPSIjQzhBOTdFIgogICAgbGV0dGVyLXNwYWNpbmc9IjMiCiAgICBvcGFjaXR5PSIwLjgiPkxFU1MgU1RSRVNTLiBNT1JFIExPVkUuPC90ZXh0Pgo8L3N2Zz4=';
 window.onload = async () => {
@@ -1513,6 +1534,10 @@ function renderDashMap() {
   const wrap = document.getElementById('dashMapEls');
   if (!wrap) return;
   if (!mapEls.length) {
+    const saved = loadMapLayout();
+    if(saved) mapEls = saved;
+  }
+  if (!mapEls.length) {
     // Init from event tables if map not started yet
     const spt = ev?.seats_per_table||10;
     const tabCount = ev?.tables_count||0;
@@ -1806,19 +1831,27 @@ function pgSeating() {
   const conf = guests.filter(g=>g.status==='confirmed');
   if (!mapInited) {
     mapInited=true;
-    const tabCount = ev?.tables_count||0;
-    // Fit all tables in a grid inside the canvas
-    // Canvas is ~340px wide on mobile
-    const canvasW = Math.min(window.innerWidth - 60, 500);
-    const cols = tabCount<=6?3:tabCount<=12?4:tabCount<=20?5:6;
-    const sz = Math.floor((canvasW - (cols+1)*10) / cols);
-    const szCapped = Math.max(48, Math.min(72, sz));
-    const gap = szCapped + 10;
-    for(let i=0;i<tabCount;i++) {
-      mapEls.push({id:'t'+(i+1),type:'table',num:i+1,
-        x:8+(i%cols)*gap,
-        y:8+Math.floor(i/cols)*gap,
-        w:szCapped, h:szCapped, seats:spt});
+    const saved = loadMapLayout();
+    if(saved){
+      mapEls = saved;
+    } else if(!mapEls.length) {
+      // Only generate a fresh grid if nothing exists yet — if the dashboard's
+      // lightweight preview already populated mapEls (renderDashMap, before any
+      // save happened), reuse those entries instead of pushing a duplicate set.
+      const tabCount = ev?.tables_count||0;
+      // Fit all tables in a grid inside the canvas
+      // Canvas is ~340px wide on mobile
+      const canvasW = Math.min(window.innerWidth - 60, 500);
+      const cols = tabCount<=6?3:tabCount<=12?4:tabCount<=20?5:6;
+      const sz = Math.floor((canvasW - (cols+1)*10) / cols);
+      const szCapped = Math.max(48, Math.min(72, sz));
+      const gap = szCapped + 10;
+      for(let i=0;i<tabCount;i++) {
+        mapEls.push({id:'t'+(i+1),type:'table',num:i+1,
+          x:8+(i%cols)*gap,
+          y:8+Math.floor(i/cols)*gap,
+          w:szCapped, h:szCapped, seats:spt});
+      }
     }
   }
   mapEls.filter(e=>e.type==='table').forEach(e=>{e.guests=conf.filter(g=>g.table_number===e.num);e.seats=spt;});
@@ -1827,6 +1860,7 @@ function pgSeating() {
     <div class="page-header">
       <div>${backBtn()}<div class="page-title" style="margin-top:8px;">מפת אולם</div><div class="page-sub">גררו שולחנות לסדר האולם שלכם</div></div>
       <div class="page-actions" style="flex-wrap:wrap;gap:6px;">
+        <button class="btn btn-gold btn-sm" onclick="saveMapLayout()">💾 שמור שינויים</button>
         <button class="btn btn-dark btn-sm" onclick="addMT()">+ שולחן</button>
         <button class="btn btn-dark btn-sm" onclick="addME('stage','🎤','במה',140,60)">+ במה</button>
         <button class="btn btn-dark btn-sm" onclick="addME('dance','💃','רחבה',170,90)">+ רחבה</button>
@@ -1992,6 +2026,13 @@ function setTableCat(elId, cat) {
 function deselMap(){mapSel=null;const b=document.getElementById('btnDel');if(b)b.style.display='none';const i=document.getElementById('selInfo');if(i)i.style.display='none';const q=document.getElementById('tableQuickPop');if(q)q.classList.remove('show');drawMap();}
 function delSel(){if(!mapSel)return;if(!confirm('למחוק?'))return;mapEls=mapEls.filter(e=>e.id!==mapSel);mapSel=null;const b=document.getElementById('btnDel');if(b)b.style.display='none';const i=document.getElementById('selInfo');if(i)i.style.display='none';const q=document.getElementById('tableQuickPop');if(q)q.classList.remove('show');drawMap();toast('נמחק');}
 function scrollToTableCategory(){const i=document.getElementById('selInfo');if(i)i.scrollIntoView({behavior:'smooth',block:'start'});}
+// Dismiss the "choose category" quick popup on any tap outside it (selecting a
+// table/element already shows/hides it via selMap — clicks on map elements never
+// reach here since drawMap()'s click handler calls e.stopPropagation()).
+document.addEventListener('click', e=>{
+  const q = document.getElementById('tableQuickPop');
+  if(q && q.classList.contains('show') && !q.contains(e.target)) q.classList.remove('show');
+});
 function addMT(){
   // Get all existing table nums and find next sequential
   const existing = mapEls.filter(e=>e.type==='table').map(e=>Number(e.num)).sort((a,b)=>a-b);
