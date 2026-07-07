@@ -234,7 +234,7 @@ body { font-family: 'Heebo', sans-serif; color: var(--text); background: var(--b
         <label class="form-label">סיסמת בעלים</label>
         <input type="password" id="owner-password" class="form-input" placeholder="הכנס סיסמא" dir="ltr" onkeydown="if(event.key==='Enter')checkPassword()">
       </div>
-      <button class="btn-login" onclick="checkPassword()">כניסה</button>
+      <button class="btn-login" id="login-btn" onclick="checkPassword()">כניסה</button>
     </div>
   </div>
 </div>
@@ -451,8 +451,20 @@ const OWNER_PASSWORD = 'loviva2025';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const nicheLabels = { hair:'שיער', nails:'ציפורניים', beauty:'קוסמטיקה', fitness:'כושר', therapy:'טיפול', other:'אחר' };
-const nicheEmojis = { hair:'✂️', nails:'💅', beauty:'💄', fitness:'💪', therapy:'🧠', other:'🏪' };
+const nicheLabels = { hair:'שיער', nails:'ציפורניים', beauty:'קוסמטיקה', fitness:'כושר', therapy:'טיפול', wedding:'חתונות', other:'אחר' };
+const nicheEmojis = { hair:'✂️', nails:'💅', beauty:'💄', fitness:'💪', therapy:'🧠', wedding:'💍', other:'🏪' };
+
+// XSS guard for any DB-sourced string interpolated into innerHTML below.
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// The users/businesses table only ever gets `groom_name`/`bride_name` written to it at signup
+// (see app.html's insert into `users`) — `name` isn't a real populated field for this product,
+// so prefer name if it's ever present, otherwise fall back to the couple's names.
+function bizName(biz){
+  if (biz.name) return biz.name;
+  if (biz.groom_name) return biz.groom_name + (biz.bride_name ? ' ו' + biz.bride_name : '');
+  return 'ללא שם';
+}
 const hebrewMonths = ['','ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 
 // Default expenses
@@ -466,9 +478,61 @@ let expenses = JSON.parse(localStorage.getItem('loviva-expenses') || 'null') || 
 
 let allBusinesses = [];
 
+// ── Login lockout (client-side deterrent only — NOT real security; the password
+// check itself still happens in the browser, see OWNER_PASSWORD above. This just
+// slows down brute-force guessing in a normal browser session). State lives in
+// sessionStorage so it resets per browser session but survives a page reload
+// within that session.
+const LOGIN_LOCK_KEY = 'loviva_owner_login_lock';
+const LOCKOUT_DURATIONS_SEC = [30, 60, 120]; // escalates each time 5 fails is hit again, caps at last value
+let loginLockTimer = null;
+
+function loadLoginLock() {
+  try { return JSON.parse(sessionStorage.getItem(LOGIN_LOCK_KEY) || 'null') || { fails: 0, lockUntil: 0, streak: 0 }; }
+  catch(e) { return { fails: 0, lockUntil: 0, streak: 0 }; }
+}
+function saveLoginLock(state) {
+  sessionStorage.setItem(LOGIN_LOCK_KEY, JSON.stringify(state));
+}
+
+function applyLoginLockUI() {
+  const state = loadLoginLock();
+  const err = document.getElementById('error-msg');
+  const btn = document.getElementById('login-btn');
+  clearInterval(loginLockTimer);
+  const tick = () => {
+    const remain = Math.ceil((state.lockUntil - Date.now()) / 1000);
+    if (remain <= 0) {
+      clearInterval(loginLockTimer);
+      if (btn) btn.disabled = false;
+      err.style.display = 'none';
+      return;
+    }
+    if (btn) btn.disabled = true;
+    err.textContent = `🔒 יותר מדי ניסיונות כושלים. נסו שוב בעוד ${remain} שניות.`;
+    err.style.display = 'block';
+  };
+  if (state.lockUntil && Date.now() < state.lockUntil) {
+    tick();
+    loginLockTimer = setInterval(tick, 1000);
+  } else if (btn) {
+    btn.disabled = false;
+  }
+}
+
 function checkPassword() {
+  const state = loadLoginLock();
+  const err = document.getElementById('error-msg');
+
+  if (state.lockUntil && Date.now() < state.lockUntil) {
+    applyLoginLockUI();
+    return;
+  }
+
   const pwd = document.getElementById('owner-password').value;
   if (pwd === OWNER_PASSWORD) {
+    sessionStorage.removeItem(LOGIN_LOCK_KEY);
+    err.style.display = 'none';
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
     // Set current month/year
@@ -477,8 +541,18 @@ function checkPassword() {
     document.getElementById('acc-year').value = now.getFullYear();
     loadDashboard();
   } else {
-    const err = document.getElementById('error-msg');
-    err.textContent = '❌ סיסמא שגויה';
+    state.fails = (state.fails || 0) + 1;
+    if (state.fails >= 5) {
+      state.streak = (state.streak || 0) + 1;
+      const dur = LOCKOUT_DURATIONS_SEC[Math.min(state.streak - 1, LOCKOUT_DURATIONS_SEC.length - 1)];
+      state.lockUntil = Date.now() + dur * 1000;
+      state.fails = 0;
+      saveLoginLock(state);
+      applyLoginLockUI();
+      return;
+    }
+    saveLoginLock(state);
+    err.textContent = `❌ סיסמא שגויה (נותרו ${5 - state.fails} ניסיונות לפני נעילה זמנית)`;
     err.style.display = 'block';
   }
 }
@@ -487,7 +561,11 @@ function logout() {
   document.getElementById('login-screen').style.display = 'block';
   document.getElementById('dashboard-screen').style.display = 'none';
   document.getElementById('owner-password').value = '';
+  applyLoginLockUI();
 }
+
+// Restore lockout countdown/disabled state on page (re)load, e.g. after a refresh mid-lockout.
+applyLoginLockUI();
 
 function showTab(tab) {
   document.getElementById('tab-businesses').style.display = tab === 'businesses' ? 'block' : 'none';
@@ -524,7 +602,7 @@ async function togglePaying(id, paying) {
 }
 
 async function loadDashboard() {
-  const { data: businesses } = await db.from('users').select('*').order('created_at',{ascending:false}).order('created_at', { ascending: false });
+  const { data: businesses } = await db.from('users').select('*').order('created_at', { ascending: false });
   if (!businesses) return;
   allBusinesses = businesses;
 

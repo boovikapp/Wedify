@@ -455,6 +455,10 @@ function selQ(key, val, btnEl) {
 
 async function submitRSVP() {
   if (!choice_) { alert('אנא בחרו אם אתם מגיעים'); return; }
+  // Disable immediately, before any async work, so a double-click/double-tap or a
+  // second race event cannot slip through and trigger a second insert from this page load.
+  if (isSubmitting_) return;
+  isSubmitting_ = true;
   var btn = document.getElementById('btnSubmit');
   btn.textContent = 'שולח...'; btn.disabled = true;
 
@@ -480,11 +484,11 @@ async function submitRSVP() {
   }
 
   var db = window._db;
-  if (!db) { btn.textContent='שגיאה — נסו שוב'; btn.disabled=false; return; }
+  if (!db) { isSubmitting_=false; btn.textContent='שגיאה — נסו שוב'; btn.disabled=false; return; }
 
   if(typeof gtag!=='undefined') gtag('event','rsvp_submit',{event_category:'rsvp',event_label:choice_});
   var r = await db.from('guests').insert(payload).select().single();
-  if (r.error) { btn.textContent='שגיאה — נסו שוב'; btn.disabled=false; return; }
+  if (r.error) { isSubmitting_=false; btn.textContent='שגיאה — נסו שוב'; btn.disabled=false; return; }
   showSuccess(r.data);
 }
 

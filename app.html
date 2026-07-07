@@ -2122,7 +2122,7 @@ function exportCSV(type) {
   else if(type==='confirmed'){hd=['שם פרטי','שם משפחה','טלפון','מלווים','שולחן'];rows=guests.filter(g=>g.status==='confirmed').map(g=>[g.first_name,g.last_name,g.phone,g.companions,g.table_number||'']);}
   else if(type==='declined'){hd=['שם פרטי','שם משפחה','טלפון'];rows=guests.filter(g=>g.status==='declined').map(g=>[g.first_name,g.last_name,g.phone]);}
   else if(type==='tables'){hd=['שם פרטי','שם משפחה','שולחן','מלווים'];rows=guests.filter(g=>g.table_number).sort((a,b)=>a.table_number-b.table_number).map(g=>[g.first_name,g.last_name,g.table_number,g.companions]);}
-  const csv=[hd,...rows].map(r=>r.join(',')).join('\n');
+  const csv=[hd,...rows].map(r=>r.map(csvField).join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv); a.download=`loviva_${type}.csv`; a.click();
   toast('ייצוא הצליח ✓','success');
 }
@@ -2540,21 +2540,20 @@ async function sendReminderAll(){
 
 // ── SMART SEATING ─────────────────────────────────────────
 async function runSmartSeating(){
-  const unseat = guests.filter(g=>g.status==='confirmed'&&!g.table_number);
+  // Get contact info for category/side (also used to exclude manual-seating tagged contacts)
+  const getContact = (g) => contacts.find(c=>c.id===g.contact_id);
+  const unseat = guests.filter(g=>g.status==='confirmed'&&!g.table_number&&!(getContact(g)?.tags||[]).includes('הושבה ידנית'));
   if(!unseat.length){toast('כל המאושרים משובצים ✓','success');return;}
-  
+
   const spt = ev?.seats_per_table||10;
   const tbl = ev?.tables_count||20;
-  
+
   // Track occupancy per table
   const occ = {};
   for(let i=1;i<=tbl;i++) occ[i]=0;
   guests.filter(g=>g.table_number).forEach(g=>{
     if(occ[g.table_number]!==undefined) occ[g.table_number]+=(g.companions||0)+1;
   });
-
-  // Get contact info for category/side
-  const getContact = (g) => contacts.find(c=>c.id===g.contact_id);
 
   // Group guests by category+side for smart grouping
   const groups = {};
@@ -2570,9 +2569,9 @@ async function runSmartSeating(){
 
   // Priority order: VIP first, then family by side, then friends, then work
   const priority = ['__VIP__'];
-  ['משפחה__צד כלה','משפחה__צד חתן','משפחה__משותף',
-   'חברים__צד כלה','חברים__צד חתן','חברים__משותף',
-   'עבודה__צד כלה','עבודה__צד חתן','עבודה__משותף',
+  ['משפחה__כלה','משפחה__חתן','משפחה__משותף',
+   'חברים__כלה','חברים__חתן','חברים__משותף',
+   'עבודה__כלה','עבודה__חתן','עבודה__משותף',
   ].forEach(k=>{ if(groups[k]) priority.push(k); });
   // Add any remaining groups
   Object.keys(groups).forEach(k=>{ if(!priority.includes(k)) priority.push(k); });
@@ -2700,9 +2699,9 @@ const HELP_BANNERS = {
   contacts: { icon:'👥', title:'ספר הטלפונים',
     text:'הוסיפו מוזמנים ידנית או ייבאו מאנשי קשר. אחרי ההוספה שלחו הזמנות WhatsApp לכולם בלחיצה אחת.', key:'help_contacts' },
   seating: { icon:'🪑', title:'מפת האולם',
-    text:'הוסיפו שולחנות ואלמנטים (במה, רחבה, כניסה). לחצו על שולחן לקביעת קטגוריה. "הושבה חכמה" תשבץ את כל המאושרים אוטומטית.', key:'help_seating' },
+    text:'הוסיפו שולחנות ואלמנטים (במה, רחבה, כניסה). ניתן לסמן קטגוריה לשולחן לצורך תיוג ויזואלי בלבד — "הושבה חכמה" משבצת את המאושרים לפי הקטגוריה והצד שהוגדרו לכל איש קשר בספר הטלפונים, לא לפי תיוג השולחן.', key:'help_seating' },
   tables: { icon:'🍽️', title:'ניהול שולחנות',
-    text:'"הושבה חכמה" משבצת את כל מי שאישר הגעה לפי קטגוריה: VIP ראשון, משפחה, חברים, עבודה.', key:'help_tables' },
+    text:'"הושבה חכמה" משבצת את כל מי שאישר הגעה לפי הקטגוריה והצד שהוגדרו לכל איש קשר בספר הטלפונים: VIP ראשון, ואז משפחה, חברים, עבודה. תיוג הקטגוריה על השולחן עצמו במפת האולם הוא ויזואלי בלבד ואינו משפיע על השיבוץ.', key:'help_tables' },
   tasks: { icon:'✅', title:'רשימת משימות',
     text:'עקבו אחר כל המשימות לחתונה. לחצו על משימה לסימון. הוסיפו משימות חדשות בכפתור למעלה.', key:'help_tasks' },
 };
