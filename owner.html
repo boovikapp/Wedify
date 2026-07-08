@@ -96,6 +96,11 @@ body { font-family: 'Heebo', sans-serif; color: var(--text); background: var(--b
 .btn-unblock { background: #d1fae5; color: #059669; }
 .btn-paying { background: #d1fae5; color: #059669; }
 .btn-trial { background: #fef3c7; color: #d97706; }
+button[data-biz-filter] { background: #f1f5f9; color: #475569; padding: 6px 14px; font-size: 12px; }
+button[data-biz-filter].active { background: #1e293b; color: #fff; }
+.biz-progress { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #64748b; flex-wrap: wrap; margin-top: 4px; }
+.biz-progress-stage { font-weight: 700; }
+.biz-progress b { color: #1e293b; }
 
 /* ACCOUNTING */
 .month-selector { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
@@ -269,7 +274,14 @@ body { font-family: 'Heebo', sans-serif; color: var(--text); background: var(--b
       <div class="stat-box"><div class="stat-num" id="monthly-revenue">₪0</div><div class="stat-label">הכנסה חודשית</div></div>
     </div>
     <div class="card">
-      <div class="card-title">🏪 כל העסקים</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+        <div class="card-title" style="margin-bottom:0;">🏪 כל הרשומים</div>
+        <div id="biz-filter-chips" style="display:flex;gap:6px;">
+          <button class="owner-btn active" data-biz-filter="all" onclick="setBizFilter('all')">הכל</button>
+          <button class="owner-btn" data-biz-filter="free" onclick="setBizFilter('free')">🆓 רשומים חינם</button>
+          <button class="owner-btn" data-biz-filter="paying" onclick="setBizFilter('paying')">💳 רשומים ששילמו</button>
+        </div>
+      </div>
       <div id="businesses-list"><div style="text-align:center;padding:40px;color:var(--gray);">טוען...</div></div>
     </div>
   </div>
@@ -588,9 +600,16 @@ function showTab(tab) {
 }
 
 let showTestAccounts = false;
+let bizFilter = 'all'; // 'all' | 'free' | 'paying'
 
 function toggleShowTest() {
   showTestAccounts = !showTestAccounts;
+  renderBusinesses();
+}
+
+function setBizFilter(f) {
+  bizFilter = f;
+  document.querySelectorAll('[data-biz-filter]').forEach(b => b.classList.toggle('active', b.dataset.bizFilter === f));
   renderBusinesses();
 }
 
@@ -615,10 +634,42 @@ async function togglePaying(id, paying) {
   loadDashboard();
 }
 
+// Per-user event progress (event created → contacts added → invites sent),
+// used by renderBusinesses() to show each registrant's guest-list size, how
+// many invites have gone out, and which onboarding stage they're at.
+let eventsByUser = {};
+let contactStatsByEvent = {};
+
+async function loadEventProgress() {
+  const [{ data: events }, { data: contacts }] = await Promise.all([
+    db.from('events').select('id,user_id,event_date'),
+    db.from('contacts').select('event_id,invite_sent'),
+  ]);
+  eventsByUser = {};
+  (events||[]).forEach(e => { eventsByUser[e.user_id] = e; });
+  contactStatsByEvent = {};
+  (contacts||[]).forEach(c => {
+    if (!contactStatsByEvent[c.event_id]) contactStatsByEvent[c.event_id] = { total: 0, sent: 0 };
+    contactStatsByEvent[c.event_id].total++;
+    if (c.invite_sent) contactStatsByEvent[c.event_id].sent++;
+  });
+}
+
+function bizStage(biz) {
+  const ev = eventsByUser[biz.id];
+  const stats = ev ? (contactStatsByEvent[ev.id] || { total: 0, sent: 0 }) : { total: 0, sent: 0 };
+  if (biz.is_paying) return { label: 'משלם', icon: '💳', guests: stats.total, sent: stats.sent };
+  if (stats.sent > 0) return { label: 'שלח הזמנות', icon: '📤', guests: stats.total, sent: stats.sent };
+  if (stats.total > 0) return { label: 'הוסיף מוזמנים', icon: '👥', guests: stats.total, sent: stats.sent };
+  if (ev && ev.event_date) return { label: 'הגדיר פרטי אירוע', icon: '📅', guests: 0, sent: 0 };
+  return { label: 'נרשם', icon: '🆕', guests: 0, sent: 0 };
+}
+
 async function loadDashboard() {
   const { data: businesses } = await db.from('users').select('*').order('created_at', { ascending: false });
   if (!businesses) return;
   allBusinesses = businesses;
+  await loadEventProgress();
 
   const now = new Date();
   const realBiz = businesses.filter(b => !b.is_test);
@@ -653,13 +704,15 @@ async function loadDashboard() {
 
 function renderBusinesses() {
   const now = new Date();
-  const list = showTestAccounts
+  let list = showTestAccounts
     ? allBusinesses.filter(b => b.is_test)
     : allBusinesses.filter(b => !b.is_test);
+  if (bizFilter === 'free') list = list.filter(b => !b.is_paying);
+  if (bizFilter === 'paying') list = list.filter(b => b.is_paying);
 
   const el = document.getElementById('businesses-list');
   if (list.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray);">${showTestAccounts ? 'אין חשבונות בדיקה' : 'אין עסקים עדיין'}</div>`;
+    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray);">${showTestAccounts ? 'אין חשבונות בדיקה' : bizFilter==='free' ? 'אין רשומים חינם' : bizFilter==='paying' ? 'אין רשומים ששילמו' : 'אין עסקים עדיין'}</div>`;
     return;
   }
 
@@ -682,11 +735,19 @@ function renderBusinesses() {
         <div class="trial-progress"><div class="trial-fill" style="width:${trialPercent}%;background:${trialPercent>80?'#ef4444':'#f59e0b'};"></div></div>
       </div>` : '';
 
+    const stage = bizStage(biz);
+    const progressHtml = `<div class="biz-progress">
+        <span class="biz-progress-stage">${stage.icon} ${stage.label}</span>
+        <span>👥 <b>${stage.guests}</b> מוזמנים</span>
+        <span>📤 <b>${stage.sent}</b> הזמנות נשלחו</span>
+      </div>`;
+
     return `<div class="biz-item" style="${biz.is_test ? 'opacity:0.65;' : ''}">
       <div class="biz-avatar">${nicheEmojis[niche]}</div>
       <div class="biz-info">
         <div class="biz-name">${escapeHtml(bizName(biz))}</div>
         <div class="biz-meta">📞 ${escapeHtml(biz.phone||'—')} · ${nicheLabels[niche]} · נרשם ${created.getDate()}/${created.getMonth()+1}/${created.getFullYear()}</div>
+        ${progressHtml}
       </div>
       ${trialHtml}
       <div class="action-btns">
