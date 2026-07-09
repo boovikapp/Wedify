@@ -128,20 +128,31 @@ body{font-family:'Heebo',Arial,sans-serif;background:#0F1115;color:#F8FAFC;
 .tbl-num{font-size:44px;font-weight:800;color:#C8A97E;line-height:1;}
 
 /* GIFT */
-.gift-area{background:#1E2028;border:1px solid rgba(200,169,126,0.2);
-  border-radius:16px;padding:18px;margin-top:14px;text-align:right;}
-.gift-title{font-size:13px;font-weight:700;color:#F8FAFC;margin-bottom:10px;text-align:center;}
-.gift-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-  padding:12px;border-radius:11px;border:none;font-family:inherit;font-size:13px;
+.gift-area{background:linear-gradient(160deg,#1E2028,#171A21);
+  border:1px solid rgba(200,169,126,0.25);border-radius:20px;
+  padding:22px 20px;margin-top:16px;box-shadow:0 20px 50px rgba(0,0,0,0.35);}
+.gift-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.18em;color:#C8A97E;
+  text-transform:uppercase;text-align:center;margin-bottom:16px;opacity:0.9;}
+.gift-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  padding:14px;border-radius:14px;border:none;font-family:inherit;font-size:14px;
   font-weight:700;cursor:pointer;text-decoration:none;box-sizing:border-box;}
-.gift-btn+.gift-btn{margin-top:8px;}
-.gift-btn-paybox{background:#C8A97E;color:#171A21;}
-.gift-bit-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);
-  border:1px solid rgba(200,169,126,0.15);border-radius:11px;padding:10px 14px;}
-.gift-bit-num{flex:1;font-size:15px;font-weight:700;color:#F8FAFC;direction:ltr;text-align:left;}
-.gift-bit-copy{background:none;border:1px solid rgba(200,169,126,0.3);color:#C8A97E;
-  border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
-.gift-hint{font-size:11px;color:rgba(248,250,252,0.4);margin-top:6px;line-height:1.6;}
+.gift-btn+.gift-bit-card,.gift-bit-card+.gift-btn,.gift-btn+.gift-btn{margin-top:10px;}
+.gift-btn-paybox{background:linear-gradient(135deg,#C8A97E,#AF8A55);color:#171A21;
+  box-shadow:0 10px 28px rgba(200,169,126,0.25);}
+.gift-btn-icon{font-size:17px;line-height:1;}
+.gift-bit-card{background:#0F1115;border:1px solid rgba(248,250,252,0.08);
+  border-radius:14px;padding:14px 16px;}
+.gift-bit-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;}
+.gift-bit-app{font-size:11px;font-weight:800;letter-spacing:0.06em;
+  color:rgba(248,250,252,0.5);text-transform:uppercase;}
+.gift-bit-num{font-size:19px;font-weight:800;color:#F8FAFC;direction:ltr;
+  font-variant-numeric:tabular-nums;}
+.gift-bit-copy{width:100%;background:rgba(200,169,126,0.1);
+  border:1.5px solid rgba(200,169,126,0.35);color:#C8A97E;border-radius:11px;
+  padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all 0.15s;}
+.gift-bit-copy:hover{background:rgba(200,169,126,0.18);}
 
 /* LOADING */
 .loading{padding:48px 20px;text-align:center;}
@@ -290,13 +301,17 @@ gtag('config','G-VKNB4HCVVT');
             <div class="tbl-num" id="tblNum">—</div>
           </div>
           <div class="gift-area" id="giftArea" style="display:none;">
-            <div class="gift-title">🎁 רוצים לשלוח מתנה לזוג?</div>
-            <a class="gift-btn gift-btn-paybox" id="giftPayboxBtn" style="display:none;" target="_blank" rel="noopener">💳 שליחת מתנה ב-PayBox</a>
-            <div class="gift-bit-row" id="giftBitRow" style="display:none;">
-              <span class="gift-bit-num" id="giftBitNum"></span>
-              <button class="gift-bit-copy" onclick="copyGiftBit(this)">העתק מספר</button>
+            <div class="gift-eyebrow">🎁 מתנה לזוג</div>
+            <a class="gift-btn gift-btn-paybox" id="giftPayboxBtn" style="display:none;" target="_blank" rel="noopener">
+              <span class="gift-btn-icon">💳</span><span>שליחת מתנה ב-PayBox</span>
+            </a>
+            <div class="gift-bit-card" id="giftBitCard" style="display:none;">
+              <div class="gift-bit-top">
+                <span class="gift-bit-app">Bit</span>
+                <span class="gift-bit-num" id="giftBitNum"></span>
+              </div>
+              <button class="gift-bit-copy" onclick="copyGiftBit(this)">📋 העתיקו את המספר ופתחו את Bit</button>
             </div>
-            <div class="gift-hint" id="giftBitHint" style="display:none;">פתחו את אפליקציית Bit ← העברה ← הדביקו את המספר</div>
           </div>
         </div>
       </div>
@@ -558,8 +573,7 @@ function showGift() {
   }
   if (phone) {
     document.getElementById('giftBitNum').textContent = phone;
-    document.getElementById('giftBitRow').style.display = 'flex';
-    document.getElementById('giftBitHint').style.display = 'block';
+    document.getElementById('giftBitCard').style.display = 'block';
     any = true;
   }
   if (any) document.getElementById('giftArea').style.display = 'block';

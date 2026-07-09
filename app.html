@@ -572,7 +572,7 @@ function trackEvent(action,category,label){
         <span class="nav-label">כניסה חכמה</span>
         <span class="nav-badge" id="nbBarcodePlan" style="display:none;background:rgba(200,169,126,0.15);color:var(--gold);">Grand</span>
       </a>
-      <a class="nav-item" href="album.html" style="text-decoration:none;">
+      <a class="nav-item" id="navAlbum" href="album.html" style="text-decoration:none;">
         <span style="font-size:16px;">📸</span>
         <span class="nav-label">אלבום שיתופי</span>
       </a>
@@ -1061,6 +1061,12 @@ function updateSidebar() {
   const bcB = document.getElementById('nbBarcodePlan');
   if (edB) edB.style.display = isGrand ? 'none' : 'inline';
   if (bcB) bcB.style.display = isGrand ? 'none' : 'inline';
+
+  // The album link was a bare "album.html" with no event id, so it always hit
+  // album.html's "קישור לא תקין" guard the moment it loaded — nothing to do with
+  // the album's post-event availability, just a missing query param.
+  const navAlbum = document.getElementById('navAlbum');
+  if (navAlbum && ev?.id) navAlbum.href = `album.html?event=${ev.id}`;
 }
 
 function updateBadges() {
