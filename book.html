@@ -531,16 +531,17 @@ async function showSuccess(guest) {
       document.getElementById('tblBadge').style.display = 'block';
       document.getElementById('tblNum').textContent = guest.table_number;
     }
-    showGift();
     // Send confirmation WA back to guest
     if (!isDemo_ && contact_.phone) {
       sendConfirmationWA(guest);
     }
   } else {
+    var hasGift = !!(event_?.gift_bit_phone||event_?.gift_paybox_link);
     document.getElementById('succIcon').textContent = '💙';
     document.getElementById('succTitle').textContent = 'הבנו, '+contact_.first_name;
-    document.getElementById('succSub').textContent = 'תודה שעדכנתם אותנו.\nנחסר אתכם!';
+    document.getElementById('succSub').textContent = 'תודה שעדכנתם אותנו.\nנחסר אתכם!' + (hasGift ? ' אם תרצו, אפשר לשמוח איתנו גם מרחוק — פרטים למטה. 💝' : '');
   }
+  showGift();
 }
 
 // Shows the gift block only if the couple set at least one of Bit/PayBox in

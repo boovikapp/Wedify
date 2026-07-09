@@ -2498,6 +2498,7 @@ function buildMsg(name,token){
   if(venue)  msg+=`📍 ${venue}\n`;
   msg+=`\n💌 לאישור הגעה לחצו כאן:\n`;
   msg+=`${link}\n\n`;
+  if(ev?.gift_bit_phone||ev?.gift_paybox_link) msg+=`💝 גם אם לא תוכלו להגיע — נשמח מאוד אם תרצו לשמוח איתנו במתנה, אפשר דרך אותו קישור.\n\n`;
   msg+=`מחכים לראותכם! 🎉`;
   return msg;
 }
@@ -2514,6 +2515,7 @@ function buildReminderMsg(name,token){
   if(evDate) msg+=`📅 ${evDate}\n`;
   msg+=`\n💌 לאישור הגעה לחצו כאן:\n`;
   msg+=`${link}\n\n`;
+  if(ev?.gift_bit_phone||ev?.gift_paybox_link) msg+=`💝 גם אם לא תוכלו להגיע — נשמח מאוד אם תרצו לשמוח איתנו במתנה, אפשר דרך אותו קישור.\n\n`;
   msg+=`תודה רבה! 🎉`;
   return msg;
 }
@@ -2560,7 +2562,8 @@ function isPaidOrOwner() {
 function openWAModal(){
   const unsent=contacts.filter(c=>!c.invite_sent);
   const g=me?.groom_name||'',b=me?.bride_name||'';
-  document.getElementById('waMsgPreview').innerHTML=`שלום <strong style="color:var(--gold)">{שם}</strong> 👋<br><br>נשמח לראותך בחתונה של<br><em style="color:var(--gold)">${b} ו${g}</em> 💍<br><br>לאישור הגעה:<br><span style="color:var(--green);">${BOOK_URL}?token={token}</span>`;
+  const giftLine = (ev?.gift_bit_phone||ev?.gift_paybox_link) ? `<br><br>💝 גם אם לא תוכלו להגיע — נשמח אם תרצו לשמוח איתנו במתנה, אפשר דרך אותו קישור.` : '';
+  document.getElementById('waMsgPreview').innerHTML=`שלום <strong style="color:var(--gold)">{שם}</strong> 👋<br><br>נשמח לראותך בחתונה של<br><em style="color:var(--gold)">${b} ו${g}</em> 💍<br><br>לאישור הגעה:<br><span style="color:var(--green);">${BOOK_URL}?token={token}</span>${giftLine}`;
   document.getElementById('waCount').textContent=`${unsent.length} אנשי קשר יקבלו הודעה`;
   if(contacts.length>0 && !isPaidOrOwner()){showPayModal();return;}
   openMod('modalWA');
