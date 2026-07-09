@@ -1753,15 +1753,22 @@ function pgGuests() {
       </div>
       ${filtered.length===0?`<div class="empty"><div class="empty-title">אין מוזמנים</div></div>`:`
       <div style="display:flex;flex-direction:column;gap:8px;">
-        ${filtered.map(g=>`
+        ${filtered.map(g=>{
+          const c = contacts.find(x=>x.id===g.contact_id);
+          return `
           <div class="contact-card">
             <div class="avatar">${escapeHtml((g.first_name[0]||'')+(g.last_name[0]||''))}</div>
             <div style="flex:1;min-width:0;">
               <div style="font-weight:700;font-size:14px;color:var(--white);margin-bottom:4px;">${escapeHtml(g.first_name)} ${escapeHtml(g.last_name)}</div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                 <span class="badge badge-green">✓ מגיע</span>
                 ${g.companions>0?`<span class="badge badge-gray">+${g.companions} מלווים</span>`:''}
                 ${g.table_number?`<span class="badge badge-gold">שולחן ${g.table_number}</span>`:`<span class="badge badge-amber">ללא שיבוץ</span>`}
+                ${c?`<select onchange="updateContactCategory('${c.id}',this.value)"
+                    style="padding:3px 8px;border-radius:100px;border:1px solid var(--border2);
+                      background:var(--bg3);color:var(--gray);font-family:Heebo,sans-serif;font-size:11px;cursor:pointer;">
+                    ${['משפחה','חברים','צבא','שכנים','עבודה','VIP','אחר'].map(cat=>`<option ${c.category===cat?'selected':''}>${cat}</option>`).join('')}
+                  </select>`:''}
               </div>
             </div>
             <input type="number" min="1" placeholder="שולחן" value="${g.table_number||''}"
@@ -1769,7 +1776,11 @@ function pgGuests() {
                 font-family:Heebo,sans-serif;font-size:13px;outline:none;text-align:center;
                 background:var(--bg3);color:var(--white);"
               onchange="assignTable('${g.id}',this.value)">
-          </div>`).join('')}
+            <button onclick="markGuestDeclined('${g.id}')" title="הודיע/ה שלא מגיע/ה"
+              style="width:32px;height:32px;border:none;background:var(--bg3);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray);flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>`;}).join('')}
       </div>`}
     </div>`;
 }
@@ -2779,6 +2790,25 @@ async function removeTable(gid){
   await sb.from('guests').update({table_number:null}).eq('id',gid);
   const g=guests.find(x=>x.id===gid); if(g) g.table_number=null;
   toast('הוסר מהשולחן'); renderPage(curPage);
+}
+
+// For a guest who confirmed but later said they're not coming after all —
+// moves them to "declined" (rather than deleting their record outright) so
+// they're not lost from stats/exports and don't revert to "awaiting response".
+// Frees their table seat too.
+async function markGuestDeclined(gid){
+  const g=guests.find(x=>x.id===gid); if(!g) return;
+  if(!confirm(`להסיר את ${g.first_name} ${g.last_name} מרשימת המאושרים? יעבור לרשימת "לא מגיעים".`)) return;
+  await sb.from('guests').update({status:'declined',table_number:null}).eq('id',gid);
+  g.status='declined'; g.table_number=null;
+  toast(`${g.first_name} ${g.last_name} הועבר/ה ל"לא מגיעים"`); updateBadges(); renderPage(curPage);
+}
+
+async function updateContactCategory(contactId, category){
+  const c=contacts.find(x=>x.id===contactId); if(!c) return;
+  await sb.from('contacts').update({category}).eq('id',contactId);
+  c.category=category;
+  toast(`הקטגוריה עודכנה ל-${category}`,'success');
 }
 
 // ── UTILS ─────────────────────────────────────────────────
