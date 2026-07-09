@@ -2806,8 +2806,22 @@ async function markGuestDeclined(gid){
 
 async function updateContactCategory(contactId, category){
   const c=contacts.find(x=>x.id===contactId); if(!c) return;
+  const changed = c.category !== category;
   await sb.from('contacts').update({category}).eq('id',contactId);
   c.category=category;
+
+  // A guest already seated under the OLD category may no longer belong at that
+  // table once the category changes — smart seating only ever places guests
+  // with no table_number, so a stale seat would otherwise never get revisited.
+  // Unseat them here so the next "הושבה חכמה" run re-places them correctly.
+  const seatedGuest = changed && guests.find(g=>g.contact_id===contactId && g.table_number);
+  if (seatedGuest) {
+    await sb.from('guests').update({table_number:null}).eq('id',seatedGuest.id);
+    seatedGuest.table_number = null;
+    toast(`הקטגוריה עודכנה — ${c.first_name} הוסר/ה מהשולחן, הריצו "הושבה חכמה" לשיבוץ מחדש`,'success');
+    renderPage(curPage);
+    return;
+  }
   toast(`הקטגוריה עודכנה ל-${category}`,'success');
 }
 
