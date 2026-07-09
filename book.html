@@ -127,6 +127,22 @@ body{font-family:'Heebo',Arial,sans-serif;background:#0F1115;color:#F8FAFC;
 .tbl-lbl{font-size:11px;color:rgba(248,250,252,0.4);margin-bottom:4px;}
 .tbl-num{font-size:44px;font-weight:800;color:#C8A97E;line-height:1;}
 
+/* GIFT */
+.gift-area{background:#1E2028;border:1px solid rgba(200,169,126,0.2);
+  border-radius:16px;padding:18px;margin-top:14px;text-align:right;}
+.gift-title{font-size:13px;font-weight:700;color:#F8FAFC;margin-bottom:10px;text-align:center;}
+.gift-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:12px;border-radius:11px;border:none;font-family:inherit;font-size:13px;
+  font-weight:700;cursor:pointer;text-decoration:none;box-sizing:border-box;}
+.gift-btn+.gift-btn{margin-top:8px;}
+.gift-btn-paybox{background:#C8A97E;color:#171A21;}
+.gift-bit-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(200,169,126,0.15);border-radius:11px;padding:10px 14px;}
+.gift-bit-num{flex:1;font-size:15px;font-weight:700;color:#F8FAFC;direction:ltr;text-align:left;}
+.gift-bit-copy{background:none;border:1px solid rgba(200,169,126,0.3);color:#C8A97E;
+  border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.gift-hint{font-size:11px;color:rgba(248,250,252,0.4);margin-top:6px;line-height:1.6;}
+
 /* LOADING */
 .loading{padding:48px 20px;text-align:center;}
 .spinner{width:38px;height:38px;border:3px solid rgba(200,169,126,0.2);
@@ -272,6 +288,15 @@ gtag('config','G-VKNB4HCVVT');
           <div class="tbl-badge" id="tblBadge" style="display:none;">
             <div class="tbl-lbl">השולחן שלכם</div>
             <div class="tbl-num" id="tblNum">—</div>
+          </div>
+          <div class="gift-area" id="giftArea" style="display:none;">
+            <div class="gift-title">🎁 רוצים לשלוח מתנה לזוג?</div>
+            <a class="gift-btn gift-btn-paybox" id="giftPayboxBtn" style="display:none;" target="_blank" rel="noopener">💳 שליחת מתנה ב-PayBox</a>
+            <div class="gift-bit-row" id="giftBitRow" style="display:none;">
+              <span class="gift-bit-num" id="giftBitNum"></span>
+              <button class="gift-bit-copy" onclick="copyGiftBit(this)">העתק מספר</button>
+            </div>
+            <div class="gift-hint" id="giftBitHint" style="display:none;">פתחו את אפליקציית Bit ← העברה ← הדביקו את המספר</div>
           </div>
         </div>
       </div>
@@ -506,6 +531,7 @@ async function showSuccess(guest) {
       document.getElementById('tblBadge').style.display = 'block';
       document.getElementById('tblNum').textContent = guest.table_number;
     }
+    showGift();
     // Send confirmation WA back to guest
     if (!isDemo_ && contact_.phone) {
       sendConfirmationWA(guest);
@@ -515,6 +541,36 @@ async function showSuccess(guest) {
     document.getElementById('succTitle').textContent = 'הבנו, '+contact_.first_name;
     document.getElementById('succSub').textContent = 'תודה שעדכנתם אותנו.\nנחסר אתכם!';
   }
+}
+
+// Shows the gift block only if the couple set at least one of Bit/PayBox in
+// their event settings — money moves directly guest→couple via those apps,
+// this page only ever displays what the couple entered.
+function showGift() {
+  var link = event_?.gift_paybox_link||'';
+  var phone = event_?.gift_bit_phone||'';
+  var any = false;
+  if (link && /^https:\/\//i.test(link)) {
+    var btn = document.getElementById('giftPayboxBtn');
+    btn.href = link; btn.style.display = 'flex';
+    any = true;
+  }
+  if (phone) {
+    document.getElementById('giftBitNum').textContent = phone;
+    document.getElementById('giftBitRow').style.display = 'flex';
+    document.getElementById('giftBitHint').style.display = 'block';
+    any = true;
+  }
+  if (any) document.getElementById('giftArea').style.display = 'block';
+}
+
+function copyGiftBit(btn) {
+  var phone = document.getElementById('giftBitNum').textContent;
+  navigator.clipboard?.writeText(phone).then(function(){
+    var orig = btn.textContent;
+    btn.textContent = 'הועתק ✓';
+    setTimeout(function(){ btn.textContent = orig; }, 1500);
+  });
 }
 
 async function sendConfirmationWA(guest) {

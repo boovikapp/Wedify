@@ -751,6 +751,19 @@ function trackEvent(action,category,label){
     <div style="height:14px;"></div>
     <div class="form-group"><label class="form-label">קישור Waze</label><input class="form-input" id="evWaze" type="url" placeholder="https://waze.com/..." dir="ltr"></div>
 <!-- WhatsApp token managed by Loviva internally -->
+    <div style="height:14px;"></div>
+    <div style="border-top:1px solid var(--border2);padding-top:16px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--white);margin-bottom:4px;">🎁 מתנות מהאורחים (אופציונלי)</div>
+      <div style="font-size:11.5px;color:var(--gray2);line-height:1.6;margin-bottom:12px;">
+        זה עובר ישירות אליכם דרך Bit/PayBox — Loviva רק מציגה את הפרטים, לא מעבירה או שומרת כסף.
+      </div>
+      <div class="form-group"><label class="form-label">מספר טלפון ב-Bit</label><input class="form-input" id="evGiftBit" type="tel" placeholder="050-0000000" dir="ltr">
+        <div style="font-size:11px;color:var(--gray2);margin-top:4px;">המספר הרשום שלכם באפליקציית Bit</div>
+      </div>
+      <div class="form-group"><label class="form-label">קישור קבוצת PayBox</label><input class="form-input" id="evGiftPaybox" type="url" placeholder="https://payboxapp.page.link/..." dir="ltr">
+        <div style="font-size:11px;color:var(--gray2);margin-top:4px;">באפליקציית PayBox: צרו קבוצה ← שתפו ← העתיקו את הקישור לכאן</div>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="closeMod('modalSettings')">ביטול</button>
       <button class="btn btn-gold" onclick="saveEvent()">שמרו ✓</button>
@@ -2240,6 +2253,8 @@ function openSettingsMod() {
   document.getElementById('evTables').value=e.tables_count||'';
   document.getElementById('evSeats').value=e.seats_per_table||10;
   document.getElementById('evWaze').value=e.waze_link||'';
+  document.getElementById('evGiftBit').value=e.gift_bit_phone||'';
+  document.getElementById('evGiftPaybox').value=e.gift_paybox_link||'';
   // token internal
   openMod('modalSettings');
 }
@@ -2254,6 +2269,8 @@ async function saveEvent() {
     tables_count:  parseInt(document.getElementById('evTables').value)||null,
     seats_per_table: parseInt(document.getElementById('evSeats').value)||10,
     waze_link:     document.getElementById('evWaze').value||null,
+    gift_bit_phone:    document.getElementById('evGiftBit').value.trim()||null,
+    gift_paybox_link:  document.getElementById('evGiftPaybox').value.trim()||null,
   };
   let res;
   if (ev) {
