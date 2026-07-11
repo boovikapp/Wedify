@@ -1353,7 +1353,10 @@ function pgDashboard() {
   const sent      = contacts.filter(c=>c.invite_sent).length;
   const pending   = contacts.filter(c=>c.invite_sent&&!guests.find(g=>g.contact_id===c.id)).length;
   const totalPax  = guests.filter(g=>g.status==='confirmed').reduce((s,g)=>s+(g.companions||0)+1,0);
-  const pctResp   = sent>0?Math.round((confirmed+declined)/sent*100):0;
+  // Capped at 100 — a guest can be confirmed/declined without ever being formally
+  // "sent" an invite (e.g. a walk-in added directly on event-day), which can push
+  // confirmed+declined above sent and produce a nonsensical >100% response rate.
+  const pctResp   = sent>0?Math.min(100, Math.round((confirmed+declined)/sent*100)):0;
   const days      = daysToEvent();
   const g = me?.groom_name||'', b = me?.bride_name||'';
 
