@@ -596,27 +596,6 @@ function trackEvent(action,category,label){
       <button class="hamburger" onclick="openSB()"><span></span><span></span><span></span></button>
     </div>
 
-    <!-- PWA Install Banner -->
-    <div id="pwaBanner" style="display:none;background:linear-gradient(135deg,rgba(200,169,126,0.15),rgba(200,169,126,0.05));
-      border-bottom:1px solid rgba(200,169,126,0.2);padding:12px 16px;
-      display:flex;align-items:center;gap:12px;">
-      <div style="font-size:22px;">📱</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:700;color:#F8FAFC;margin-bottom:2px;">הוסיפו למסך הבית</div>
-        <div style="font-size:11px;color:rgba(248,250,252,0.55);">
-          לחצו 
-          <span style="display:inline-flex;align-items:center;gap:3px;background:rgba(200,169,126,0.15);
-            border:1px solid rgba(200,169,126,0.3);border-radius:6px;padding:1px 6px;margin:0 2px;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#C8A97E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-            שתף
-          </span>
-          ← "הוסף למסך הבית"
-        </div>
-      </div>
-      <button onclick="closePWABanner()" style="background:none;border:none;color:rgba(248,250,252,0.4);
-        font-size:18px;cursor:pointer;padding:4px;line-height:1;">✕</button>
-    </div>
-
     <div id="pageContent"></div>
   </main>
 </div>
@@ -726,6 +705,34 @@ function trackEvent(action,category,label){
       </div>
       <button class="btn btn-gold btn-full btn-xl" onclick="proceedToPayment()">לתשלום מאובטח ←</button>
       <p style="font-size:11px;color:var(--gray);margin-top:10px;">תשלום מאובטח · ללא מנוי · חד פעמי</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PWA INSTALL -->
+<div class="modal-overlay" id="modalPWAInstall" onclick="if(event.target===this)closePWAInstallModal(false)">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title">📲 התקינו כאפליקציה</div>
+      <button class="modal-close" onclick="closePWAInstallModal(false)">✕</button>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:14px;color:var(--gray);line-height:1.8;margin-bottom:18px;">
+        בלי הורדה מה-App Store! לחצו על כפתור <strong style="color:var(--gold);">שיתוף</strong> בדפדפן,
+        ואז על <strong style="color:var(--gold);">"הוסף למסך הבית"</strong> — Loviva תופיע כאפליקציה רגילה.
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:14px;
+        margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--white);">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(200,169,126,0.15);
+          border:1px solid rgba(200,169,126,0.3);border-radius:8px;padding:4px 10px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          שיתוף
+        </span>
+        ←
+        <span>הוסף למסך הבית</span>
+      </div>
+      <button class="btn btn-gold btn-full" onclick="closePWAInstallModal(false)">הבנתי, תודה</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="closePWAInstallModal(true)">אל תציג לי שוב</button>
     </div>
   </div>
 </div>
@@ -2857,23 +2864,21 @@ function toast(msg,type=''){
 // ── PWA ───────────────────────────────────────────────────
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'));
 
-// PWA Install Banner - show once
+// PWA install modal — shown once (per browser) to iOS visitors who haven't
+// already added the site to their home screen and haven't permanently
+// dismissed it. Skipped entirely when already running standalone (installed).
 (function(){
   var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
   var dismissed = localStorage.getItem('lv_pwa_dismissed');
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if (!isStandalone && !dismissed && isIOS) {
-    setTimeout(function() {
-      var b = document.getElementById('pwaBanner');
-      if (b) b.style.display = 'flex';
-    }, 3000);
+    setTimeout(function() { openMod('modalPWAInstall'); }, 3000);
   }
 })();
 
-function closePWABanner() {
-  var b = document.getElementById('pwaBanner');
-  if (b) b.style.display = 'none';
-  localStorage.setItem('lv_pwa_dismissed', '1');
+function closePWAInstallModal(permanent) {
+  closeMod('modalPWAInstall');
+  if (permanent) localStorage.setItem('lv_pwa_dismissed', '1');
 }
 
 // ── PREVENT ZOOM (iOS Safari) ──────────────────────────
